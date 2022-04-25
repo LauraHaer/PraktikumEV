@@ -34,5 +34,4 @@ FOREACH(_build_type ${_d2_build_types})
     include_directories(${GTEST_INCLUDE_DIRS})
     
     gtest_discover_tests(${_exe})
-  ENDIF()
 ENDFOREACH()

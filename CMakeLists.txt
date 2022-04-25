@@ -61,10 +61,8 @@ FOREACH(_build_type ${_d2_build_types})
     MESSAGE("-- Configuring library ${_lib}")
 
     ADD_LIBRARY(${_lib} SHARED ${_files})
-
     SET(TEST_LIBRARIES_${_BUILD_TYPE} ${_lib})
 
-  ENDIF()
 ENDFOREACH()
 
 # Google test style testing

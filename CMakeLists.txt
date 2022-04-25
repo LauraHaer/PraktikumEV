@@ -12,12 +12,8 @@
 # Set the name of the project and target
 # If your application follows the structure above, you don't need to
 # specify anything else.
-SET(_main_target laplacian)
-SET(_main source/main.cc)
-
-# Set the _main variable to empty if you don't want an executable
-# but only a library
-#SET(_main "")
+SET(_main_target praktikum)
+SET(_main "")
 
 ############################################################
 # Normally you shouldn't need to change anything below.
@@ -35,8 +31,6 @@ ENDIF()
 INCLUDE_DIRECTORIES(include)
 
 CMAKE_MINIMUM_REQUIRED(VERSION 3.10)
-
-
 
 PROJECT(${_main_target})
 

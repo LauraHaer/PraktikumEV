@@ -22,8 +22,6 @@ FOREACH(_build_type ${_d2_build_types})
   # Postfix to use everywhere
   SET(_p "${${_build_type}_postfix}")
 
-    MESSAGE("-- Found ${_build_type} version of deal.II.")
-    
     STRING(TOUPPER "${_build_type}" _BUILD_TYPE)
     SET(_exe "${_target}${${_build_type}_postfix}")
     

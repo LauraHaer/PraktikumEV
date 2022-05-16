@@ -28,7 +28,7 @@ FOREACH(_build_type ${_d2_build_types})
     MESSAGE("-- Setting up ${_exe}")
     add_executable(${_exe} ${_test_files})
 
-    TARGET_LINK_LIBRARIES(${_exe} ${TEST_LIBRARIES_${_BUILD_TYPE}} ${GTEST_LIBRARY})   
+    TARGET_LINK_LIBRARIES(${_exe} ${TEST_LIBRARIES_${_BUILD_TYPE}} ${GTEST_LIBRARY} Eigen3::Eigen )
     include_directories(${GTEST_INCLUDE_DIRS})
     
     gtest_discover_tests(${_exe})

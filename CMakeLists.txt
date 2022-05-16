@@ -34,6 +34,13 @@ CMAKE_MINIMUM_REQUIRED(VERSION 3.10)
 
 PROJECT(${_main_target})
 
+find_package (Eigen3 3.3 REQUIRED)
+INCLUDE_DIRECTORIES( EIGEN3_INCLUDE_DIR )
+
+#add_executable (example example.cpp)
+#target_link_libraries (example Eigen3::Eigen)
+
+
 OPTION(ENABLE_GOOGLE_TESTING 
 "Enable googletest style tests in this application." ON)
 
@@ -55,6 +62,7 @@ FOREACH(_build_type ${_d2_build_types})
     MESSAGE("-- Configuring library ${_lib}")
 
     ADD_LIBRARY(${_lib} SHARED ${_files})
+    TARGET_LINK_LIBRARIES(${_lib}  Eigen3::Eigen )
     SET(TEST_LIBRARIES_${_BUILD_TYPE} ${_lib})
 
 ENDFOREACH()

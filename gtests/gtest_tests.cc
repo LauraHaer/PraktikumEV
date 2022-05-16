@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-TEST(AsIlike, whatever)
+TEST(GTest, working)
 {
   unsigned int i = 1;
   ++i;

@@ -1,175 +1,212 @@
-#
-# The clang-format (Clang 6) style file used by deal.II.
-#
-
-AccessModifierOffset: -2
-
+---
+Language:        Cpp
+# BasedOnStyle:  Google
+AccessModifierOffset: -1
 AlignAfterOpenBracket: Align
-AlignConsecutiveAssignments: true
-AlignConsecutiveDeclarations: true
+AlignArrayOfStructures: None
+AlignConsecutiveMacros: None
+AlignConsecutiveAssignments: None
+AlignConsecutiveBitFields: None
+AlignConsecutiveDeclarations: None
 AlignEscapedNewlines: Left
-AlignOperands: true
+AlignOperands:   Align
 AlignTrailingComments: true
-
-AllowAllParametersOfDeclarationOnNextLine: false
-AllowShortBlocksOnASingleLine: false
+AllowAllArgumentsOnNextLine: true
+AllowAllConstructorInitializersOnNextLine: true
+AllowAllParametersOfDeclarationOnNextLine: true
+AllowShortEnumsOnASingleLine: true
+AllowShortBlocksOnASingleLine: Never
 AllowShortCaseLabelsOnASingleLine: false
-AllowShortFunctionsOnASingleLine: None
-AllowShortIfStatementsOnASingleLine: false
-AllowShortLoopsOnASingleLine: false
-
-AlwaysBreakAfterReturnType: All
-AlwaysBreakBeforeMultilineStrings: false
-AlwaysBreakTemplateDeclarations: true
-
-BinPackArguments: false
-BinPackParameters: false
-
+AllowShortFunctionsOnASingleLine: All
+AllowShortLambdasOnASingleLine: All
+AllowShortIfStatementsOnASingleLine: WithoutElse
+AllowShortLoopsOnASingleLine: true
+AlwaysBreakAfterDefinitionReturnType: None
+AlwaysBreakAfterReturnType: None
+AlwaysBreakBeforeMultilineStrings: true
+AlwaysBreakTemplateDeclarations: Yes
+AttributeMacros:
+  - __capability
+BinPackArguments: true
+BinPackParameters: true
 BraceWrapping:
-  AfterClass: true
-  AfterControlStatement: true
-  AfterEnum: true
-  AfterExternBlock: true
-  AfterFunction: true
-  AfterNamespace: true
-  AfterStruct: true
-  AfterUnion: true
-  BeforeCatch: true
-  BeforeElse: true
-  IndentBraces: true
-  SplitEmptyFunction: false
-  SplitEmptyRecord: false
-  SplitEmptyNamespace: false
-
+  AfterCaseLabel:  false
+  AfterClass:      false
+  AfterControlStatement: Never
+  AfterEnum:       false
+  AfterFunction:   false
+  AfterNamespace:  false
+  AfterObjCDeclaration: false
+  AfterStruct:     false
+  AfterUnion:      false
+  AfterExternBlock: false
+  BeforeCatch:     false
+  BeforeElse:      false
+  BeforeLambdaBody: false
+  BeforeWhile:     false
+  IndentBraces:    false
+  SplitEmptyFunction: true
+  SplitEmptyRecord: true
+  SplitEmptyNamespace: true
 BreakBeforeBinaryOperators: None
-BreakBeforeBraces: Custom
+BreakBeforeConceptDeclarations: true
+BreakBeforeBraces: Attach
 BreakBeforeInheritanceComma: false
-BreakBeforeTernaryOperators: false
-BreakConstructorInitializers: BeforeComma
-BreakStringLiterals: false
-
-ColumnLimit: 80
-
+BreakInheritanceList: BeforeColon
+BreakBeforeTernaryOperators: true
+BreakConstructorInitializersBeforeComma: false
+BreakConstructorInitializers: BeforeColon
+BreakAfterJavaFieldAnnotations: false
+BreakStringLiterals: true
+ColumnLimit:     80
+CommentPragmas:  '^ IWYU pragma:'
 CompactNamespaces: false
-
-ConstructorInitializerIndentWidth: 2
-
-ContinuationIndentWidth: 2
-
+ConstructorInitializerAllOnOneLineOrOnePerLine: true
+ConstructorInitializerIndentWidth: 4
+ContinuationIndentWidth: 4
 Cpp11BracedListStyle: true
-
-DerivePointerAlignment: false
-
+DeriveLineEnding: true
+DerivePointerAlignment: true
+DisableFormat:   false
+EmptyLineAfterAccessModifier: Never
+EmptyLineBeforeAccessModifier: LogicalBlock
+ExperimentalAutoDetectBinPacking: false
 FixNamespaceComments: true
-
-IncludeBlocks: Regroup
+ForEachMacros:
+  - foreach
+  - Q_FOREACH
+  - BOOST_FOREACH
+IfMacros:
+  - KJ_IF_MAYBE
+IncludeBlocks:   Regroup
 IncludeCategories:
-# config.h must always be first:
-  - Regex:    "deal.II/base/config.h"
-    Priority: -1
-# deal.II folders in sorted order:
-  - Regex:    "deal.II/algorithms/.*\\.h"
-    Priority: 110
-  - Regex:    "deal.II/base/.*\\.h"
-    Priority: 120
-  - Regex:    "deal.II/boost_adaptors/.*\\.h"
-    Priority: 125
-  - Regex:    "deal.II/differentiation/.*\\.h"
-    Priority: 130
-  - Regex:    "deal.II/distributed/.*\\.h"
-    Priority: 140
-  - Regex:    "deal.II/dofs/.*\\.h"
-    Priority: 150
-  - Regex:    "deal.II/fe/.*\\.h"
-    Priority: 160
-  - Regex:    "deal.II/gmsh/.*\\.h"
-    Priority: 170
-  - Regex:    "deal.II/grid/.*\\.h"
-    Priority: 180
-  - Regex:    "deal.II/hp/.*\\.h"
-    Priority: 190
-  - Regex:    "deal.II/integrators/.*\\.h"
-    Priority: 200
-  - Regex:    "deal.II/lac/.*\\.h"
-    Priority: 210
-  - Regex:    "deal.II/matrix_free/.*\\.h"
-    Priority: 220
-  - Regex:    "deal.II/meshworker/.*\\.h"
-    Priority: 230
-  - Regex:    "deal.II/multigrid/.*\\.h"
-    Priority: 240
-  - Regex:    "deal.II/non_matching/.*\\.h"
-    Priority: 250
-  - Regex:    "deal.II/numerics/.*\\.h"
-    Priority: 260
-  - Regex:    "deal.II/opencascade/.*\\.h"
-    Priority: 270
-  - Regex:    "deal.II/optimization/.*\\.h"
-    Priority: 280
-  - Regex:    "deal.II/particles/.*\\.h"
-    Priority: 290
-  - Regex:    "deal.II/physics/.*\\.h"
-    Priority: 300
-  - Regex:    "deal.II/sundials/.*\\.h"
-    Priority: 310
-# put boost right after deal:
-  - Regex: "<boost.*>"
-    Priority: 500
-# try to group PETSc headers:
-  - Regex: "<petsc.*\\.h>"
-    Priority: 1000
-# try to catch all third party headers and put them after deal.II but before
-# standard headers:
-  - Regex: "<.*\\.(h|hpp|hxx)>"
-    Priority: 2000
-# match all standard headers. Things like '#include <armadillo>' should be
-# surrounded by #ifdef checks (which will not be merged by clang-format) so they
-# should not be caught here
-  - Regex: "<[a-z_]+>"
-    Priority: 100000
-# make sure that "../tests.h" appears before all other local include files
-# such that replacing Assert in tests also applies to the testing header files.
-  - Regex: "\\.\\./tests\\.h"
-    Priority: 200000
-
+  - Regex:           '^<ext/.*\.h>'
+    Priority:        2
+    SortPriority:    0
+    CaseSensitive:   false
+  - Regex:           '^<.*\.h>'
+    Priority:        1
+    SortPriority:    0
+    CaseSensitive:   false
+  - Regex:           '^<.*'
+    Priority:        2
+    SortPriority:    0
+    CaseSensitive:   false
+  - Regex:           '.*'
+    Priority:        3
+    SortPriority:    0
+    CaseSensitive:   false
+IncludeIsMainRegex: '([-_](test|unittest))?$'
+IncludeIsMainSourceRegex: ''
+IndentAccessModifiers: false
 IndentCaseLabels: true
-IndentPPDirectives: AfterHash
-IndentWidth: 2
-
+IndentCaseBlocks: false
+IndentGotoLabels: true
+IndentPPDirectives: None
+IndentExternBlock: AfterExternBlock
+IndentRequires:  false
+IndentWidth:     2
 IndentWrappedFunctionNames: false
-
+InsertTrailingCommas: None
+JavaScriptQuotes: Leave
+JavaScriptWrapImports: true
 KeepEmptyLinesAtTheStartOfBlocks: false
-
-Language: Cpp
-
-MaxEmptyLinesToKeep: 3
-
-NamespaceIndentation: All
-
-PenaltyBreakBeforeFirstCallParameter: 90
-
-PointerAlignment: Right
-
-ReflowComments: true
-CommentPragmas: '( \| |\*--|<li>|@ref | @p |@param |@name |@returns |@warning |@ingroup |@author |@date |@related |@relates |@relatesalso |@deprecated |@image |@return |@brief |@attention |@copydoc |@addtogroup |@todo |@tparam |@see |@note |@skip |@skipline |@until |@line |@dontinclude |@include)'
-
-SortIncludes: true
+LambdaBodyIndentation: Signature
+MacroBlockBegin: ''
+MacroBlockEnd:   ''
+MaxEmptyLinesToKeep: 1
+NamespaceIndentation: None
+ObjCBinPackProtocolList: Never
+ObjCBlockIndentWidth: 2
+ObjCBreakBeforeNestedBlockParam: true
+ObjCSpaceAfterProperty: false
+ObjCSpaceBeforeProtocolList: true
+PenaltyBreakAssignment: 2
+PenaltyBreakBeforeFirstCallParameter: 1
+PenaltyBreakComment: 300
+PenaltyBreakFirstLessLess: 120
+PenaltyBreakString: 1000
+PenaltyBreakTemplateDeclaration: 10
+PenaltyExcessCharacter: 1000000
+PenaltyReturnTypeOnItsOwnLine: 200
+PenaltyIndentedWhitespace: 0
+PointerAlignment: Left
+PPIndentWidth:   -1
+RawStringFormats:
+  - Language:        Cpp
+    Delimiters:
+      - cc
+      - CC
+      - cpp
+      - Cpp
+      - CPP
+      - 'c++'
+      - 'C++'
+    CanonicalDelimiter: ''
+    BasedOnStyle:    google
+  - Language:        TextProto
+    Delimiters:
+      - pb
+      - PB
+      - proto
+      - PROTO
+    EnclosingFunctions:
+      - EqualsProto
+      - EquivToProto
+      - PARSE_PARTIAL_TEXT_PROTO
+      - PARSE_TEST_PROTO
+      - PARSE_TEXT_PROTO
+      - ParseTextOrDie
+      - ParseTextProtoOrDie
+      - ParseTestProto
+      - ParsePartialTestProto
+    CanonicalDelimiter: pb
+    BasedOnStyle:    google
+ReferenceAlignment: Pointer
+ReflowComments:  true
+ShortNamespaceLines: 1
+SortIncludes:    CaseSensitive
+SortJavaStaticImport: Before
 SortUsingDeclarations: true
-
 SpaceAfterCStyleCast: false
+SpaceAfterLogicalNot: false
 SpaceAfterTemplateKeyword: true
 SpaceBeforeAssignmentOperators: true
+SpaceBeforeCaseColon: false
+SpaceBeforeCpp11BracedList: false
+SpaceBeforeCtorInitializerColon: true
+SpaceBeforeInheritanceColon: true
 SpaceBeforeParens: ControlStatements
+SpaceAroundPointerQualifiers: Default
+SpaceBeforeRangeBasedForLoopColon: true
+SpaceInEmptyBlock: false
 SpaceInEmptyParentheses: false
-SpacesBeforeTrailingComments: 1
-SpacesInAngles: false
+SpacesBeforeTrailingComments: 2
+SpacesInAngles:  Never
+SpacesInConditionalStatement: false
+SpacesInContainerLiterals: true
 SpacesInCStyleCastParentheses: false
-SpacesInContainerLiterals: false
+SpacesInLineCommentPrefix:
+  Minimum:         1
+  Maximum:         -1
 SpacesInParentheses: false
 SpacesInSquareBrackets: false
+SpaceBeforeSquareBrackets: false
+BitFieldColonSpacing: Both
+Standard:        Auto
+StatementAttributeLikeMacros:
+  - Q_EMIT
+StatementMacros:
+  - Q_UNUSED
+  - QT_REQUIRE_VERSION
+TabWidth:        8
+UseCRLF:         false
+UseTab:          Never
+WhitespaceSensitiveMacros:
+  - STRINGIZE
+  - PP_STRINGIZE
+  - BOOST_PP_STRINGIZE
+  - NS_SWIFT_NAME
+  - CF_SWIFT_NAME
+...
 
-Standard: Cpp11
-
-TabWidth: 2
-
-UseTab: Never

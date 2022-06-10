@@ -22,9 +22,10 @@ TEST(LANCZOS, TetsStartWithEigenvector) {
                     {0, -1, 4, -1, 0},
                     {0, 0, -1, 4, 0},
                     {-1, 0, 0, 0, 4}};
-  DeVec v1 = DeVec::Zero(n);
+  Eigen::VectorXd v1 = Eigen::VectorXd::Zero(n);
   v1(0) = 1;
   v1 << -1, 0, 1, -1, 1;
   v1 = v1 / sqrt(v1.dot(v1));
-  result res = lanczos(A, n, v1);
+  result_lanczos<Eigen::MatrixXd> res = lanczos(A, n, v1);
+  std::cout << res.ev << std::endl;
 }

@@ -1,6 +1,6 @@
 #include "dummy.h"
 
- 
+
 using Eigen::MatrixXd;
 
 
@@ -11,5 +11,5 @@ void test_eigen()
   m(1,0) = 2.5;
   m(0,1) = -1;
   m(1,1) = m(1,0) + m(0,1);
-  std::cout << m << std::endl;
+  //std::cout << m << std::endl;
 }

@@ -26,3 +26,11 @@ TEST(LaplaceMatrix, CheckZeroDiagonals) {
     }
   }
 }
+
+TEST(LaplaceMatrix, CorrectNumberNonZeros) {
+ int n = 12;
+  Eigen::SparseMatrix<double> LMat;
+  LMat = CreateLaplaceMatrix<Eigen::SparseMatrix<double>>(n);
+  int nonzeros = 5*n*n - 4*n;
+  EXPECT_EQ(LMat.nonZeros(), nonzeros);
+}

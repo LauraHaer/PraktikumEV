@@ -27,14 +27,12 @@ ConvergenceCheck(SpMat A) {
 SpMat
 CalculateEigenvalues(SpMat A) {
   SpMat B = A;
-  //SpMat B = A.transpose().eval();
-  //EXPECT_EQ(A, A.transpose().eval());
   Eigen::SparseQR<SpMat,  Eigen::NaturalOrdering<int>> QRSolver;
   int i = 0;
   while ( ConvergenceCheck(A) > 1e-10 ) {
     i++;
     QRSolver.compute(A);
-    //if(QRSolver.info()!=Eigen::Success) std::cout << "FAILURE" << std::endl;
+    EXPECT_EQ(QRSolver.info(), Eigen::Success);
     Eigen::SparseMatrix<double> Q;
     Q = QRSolver.matrixQ();
     // Q = Eigen::SparseQR<Eigen::SparseMatrix<double> >(A).matrixQ(); // False line the documentation
@@ -43,7 +41,7 @@ CalculateEigenvalues(SpMat A) {
   return A;
 }
 
-TEST(EIGEN, TestEigenvalues) {
+TEST(EIGEN, TestEigenvaluesNoErrors) {
   int size_of_matrix = 5;
   SpMat  A(size_of_matrix, size_of_matrix);
   std::vector<T> entries;
@@ -56,8 +54,5 @@ TEST(EIGEN, TestEigenvalues) {
   A.setFromTriplets(entries.begin(), entries.end());
 
   SpMat D = CalculateEigenvalues(A);
-  std::cout << D << std::endl;
-  //std::cout << A.coeff(1,1) << std::endl;
-
   EXPECT_EQ(size_of_matrix, 5);
 }

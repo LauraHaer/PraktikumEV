@@ -8,6 +8,11 @@
 #include <cmath>
 #include <iostream>
 
+/// Computes `m` Ritz values for a given **Hermitian** matrix.
+/// @param A: Target Matrix 
+/// @param m: desired number of Eigenvalues
+/// @param aV1: start vector av1
+/// @returns m eigenvalues of aMat
 template <class DeMat>
 struct result_lanczos {
   DeMat a;
@@ -16,11 +21,9 @@ struct result_lanczos {
   Eigen::VectorXcd ev;
 };
 
-//  give matrix A and number of eigenvalues you want m, and start vector aV1
-template <class aMat, typename aData, int aN,
-          template <typename, int, int> class aVec>
-result_lanczos<Eigen::Matrix<aData, -1, -1>> lanczos(aMat A, const int m,
-                                                     aVec<aData, aN, 1> aV1) {
+template <class aMat, typename aData, int aN, template <typename, int, int> class aVec>
+result_lanczos<Eigen::Matrix<aData, -1, -1>> 
+lanczos(aMat A, const int m, aVec<aData, aN, 1> aV1) {
   // We define a Dense Matrix of Dynamik Size used in the calculations based on
   // the Template Datatype
   typedef Eigen::Matrix<aData, -1, -1> tmpMat;

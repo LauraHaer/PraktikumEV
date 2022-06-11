@@ -7,7 +7,7 @@
 
 using Eigen::MatrixXd;
 
-
+/// Simple test function for confirming a successfull installation
 TEST(Eigen, TestFunctioning)
 {
   MatrixXd m(2, 2);

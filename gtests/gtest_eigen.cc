@@ -9,8 +9,9 @@
 typedef Eigen::SparseMatrix<double> SpMat;
 typedef Eigen::Triplet<double> T;
 
-double
-ConvergenceCheck(SpMat A) {
+/// Check for convergence
+/// @param A: Input matrix 
+double ConvergenceCheck(SpMat A) {
   double max_val = 0;
   int size_of_matrix = A.rows();
   for ( int i = 0; i < size_of_matrix; i++ ) {
@@ -23,9 +24,8 @@ ConvergenceCheck(SpMat A) {
 }
 
 
-
-SpMat
-CalculateEigenvalues(SpMat A) {
+/// Calculate Eigenvalues
+SpMat CalculateEigenvalues(SpMat A) {
   SpMat B = A;
   Eigen::SparseQR<SpMat,  Eigen::NaturalOrdering<int>> QRSolver;
   int i = 0;

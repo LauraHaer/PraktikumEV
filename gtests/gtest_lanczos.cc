@@ -16,14 +16,6 @@ TEST(LANCZOS, InputIsValid) {
   Eigen::SparseMatrix<double> LMat;
   LMat = CreateLaplaceMatrix<Eigen::SparseMatrix<double>>(n);
   result_lanczos<Eigen::MatrixXd> res = lanczos(LMat, 10, v1);
-  
-  for (int k = 0; k < LMat.outerSize(); ++k) {
-    for (Eigen::SparseMatrix<double>::InnerIterator it(LMat, k); it; ++it) {
-      EXPECT_TRUE(std::abs(it.row() - it.col()) <= 1 ||
-                  std::abs(it.row() - it.col()) == n);
-    }
-  }
-
 }
 
 
@@ -46,7 +38,7 @@ TEST(LANCZOS, TetsStartWithEigenvector) {
   for (int i = 0; i<ev_values.size(); i++){
     EXPECT_DOUBLE_EQ(res.ev[i].real(), ev_values[i]);
   }
-  
+
   EXPECT_EQ(res.ev.size(), v1.size());
 
 }
@@ -65,7 +57,7 @@ TEST(LANCZOS, TestSizeMismatchVector){
   // [a-zA-Z0-9//<>)()/:, \][=;._-]*.
   ASSERT_DEBUG_DEATH(lanczos(A, n, v1), "[*]*" );
   // TODO: put better regex :3
-}  
+}
 
 TEST(LANCZOS, TestSizeMismatchMatrix){
   int n = 5;
@@ -80,7 +72,7 @@ TEST(LANCZOS, TestSizeMismatchMatrix){
   // [a-zA-Z0-9//<>)()/:, \][=;._-]*.
   ASSERT_DEBUG_DEATH(lanczos(A, n, v1), "[*]*" );
   // TODO: put better regex :3
-} 
+}
 
 // TODO dense matrix?, non-hermitian matrix?
 //

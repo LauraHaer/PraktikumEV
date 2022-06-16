@@ -14,7 +14,11 @@
 # specify anything else.
 SET(_main_target praktikum)
 SET(_main "")
-
+#SET(CMAKE_CXX_FLAGS_DEBUG_INIT "-Wall")
+add_compile_options(
+  "-Wall" "-Wpedantic" "-Wextra" "-fexceptions" "-Wfloat-equal"
+  "$<$<CONFIG:DEBUG>:-O0;-g3;-ggdb>"
+)
 ############################################################
 # Normally you shouldn't need to change anything below.
 ############################################################
@@ -41,7 +45,7 @@ INCLUDE_DIRECTORIES( EIGEN3_INCLUDE_DIR )
 #target_link_libraries (example Eigen3::Eigen)
 
 
-OPTION(ENABLE_GOOGLE_TESTING 
+OPTION(ENABLE_GOOGLE_TESTING
 "Enable googletest style tests in this application." ON)
 
 # We add one library and one target for  both Release and Debug

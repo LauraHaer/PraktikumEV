@@ -8,8 +8,10 @@
 #include <cmath>
 #include <iostream>
 
+#include "Lanczos_saad.hh"
+
 /// Computes `m` Ritz values for a given **Hermitian** matrix.
-/// @param A: Target Matrix 
+/// @param A: Target Matrix
 /// @param m: desired number of Eigenvalues
 /// @param aV1: start vector av1
 /// @returns m eigenvalues of aMat
@@ -21,44 +23,58 @@ struct result_lanczos {
   Eigen::VectorXcd ev;
 };
 
-template <class aMat, typename aData, int aN, template <typename, int, int> class aVec>
-result_lanczos<Eigen::Matrix<aData, -1, -1>> 
-lanczos(aMat A, const int m, aVec<aData, aN, 1> aV1) {
+template <class aMat, class aVec>
+result_lanczos<Eigen::Matrix<typename aVec::value_type, -1, -1>> lanczos_factorization(
+    const aMat& A, const int& m, const aVec& aR, const double& aRho) {
   // We define a Dense Matrix of Dynamik Size used in the calculations based on
   // the Template Datatype
-  typedef Eigen::Matrix<aData, -1, -1> tmpMat;
-  assert(A.cols() == A.rows());
-  assert(A.cols() == aV1.rows());
-  assert(m <= aV1.rows());
-  assert(sqrt(aV1.dot(aV1)) == 1);
+  typedef Eigen::Matrix<typename aVec::value_type, -1, -1> tmpMat;
+//  assert("Matrix must be quadratic", A.cols() == A.rows());
+//  assert("aR and A must have the same number of rows", A.cols() == aR.rows());
+  //  static_assert(typeid(typename aMat::value_type) ==
+  //                typeid(typename aVec::value_type));
+//  assert("Number of calculated Eigenvalues must be <= dim(A)", m <= aR.rows());
 
-  tmpMat TMat = tmpMat::Zero(m, m);
-  tmpMat v = tmpMat::Zero(aV1.rows(), m + 2);
-  v.col(1) = aV1;
-  aData b_i = 0;
+  aVec r = aR;
+  Eigen::Matrix<typename aVec::value_type, -1, 1> beta =
+      Eigen::Matrix<typename aVec::value_type, -1, 1>::Zero(m + 1);
+  Eigen::Matrix<typename aVec::value_type, -1, 1> alpha =
+      Eigen::Matrix<typename aVec::value_type, -1, 1>::Zero(m + 1);
+  beta(0) = r.norm();
+//  assert("startvector aR should have norm >> 0", beta(0) >= 1e-16);
+  tmpMat v = tmpMat::Zero(aR.rows(), m + 1);
 
   // the algorithm
-  for (int i = 1; i <= m; i++) {
-    Eigen::Matrix<aData, aN, 1> w_i =
-        A * v.col(i) - b_i * v.col(i - 1);  // line2
-    aData a_i = w_i.dot(v.col(i));          // line3
-    w_i = w_i - a_i * v.col(i);             // line4
-    aData b_ip1 = sqrt(w_i.dot(w_i));       // line5
-
-    TMat(i - 1, i - 1) = a_i;
-    if (i < m) {
-      TMat(i, i - 1) = b_ip1;
-      TMat(i - 1, i) = b_ip1;
+  for (int i = 1; i <= m; ++i) {
+    v.col(i) = r / r.norm();                        // Step (3)
+    r = A * v.col(i) - v.col(i - 1) * beta(i - 1);  // Step (4)
+    alpha(i) = v.col(i).dot(r);                     // Step (5)
+    r = r - v.col(i) * alpha(i);                    // Step (6)
+    if (r.norm() <
+        aRho * sqrt(std::pow(alpha(i), 2) + std::pow(beta(i - 1), 2))) {
+      Eigen::Matrix<typename aVec::value_type, -1, 1> s =
+          v.transpose() * r;  // Step (8)
+      r = r - v * s;          // Step (9)
+      alpha(i) = alpha(i) + s(i);
+      beta(i) = beta(i) + s(i - 1);
     }
-    if (b_ip1 == 0) break;  // line 6
-    v.col(i + 1) = w_i / b_ip1;
   }
   // std::cout << "TMat = " << TMat << std::endl;
   result_lanczos<tmpMat> res;
-  res.v = v;
-  Eigen::EigenSolver<tmpMat> es(TMat);
-  // std::cout << "the evs are " << es.eigenvalues() << std::endl;
-  res.ev = es.eigenvalues();
+  //res.v = v;
+  //Eigen::EigenSolver<tmpMat> es(TMat);
+  //// std::cout << "the evs are " << es.eigenvalues() << std::endl;
+  //res.ev = es.eigenvalues();
+  return res;
+}
+
+template <class aMat, class aVec>
+result_lanczos<Eigen::Matrix<typename aVec::value_type, -1, -1>> lanczos(
+    const aMat& A, const int& m, const aVec& aR, const double& aRho=1.0) {
+    result_lanczos<Eigen::Matrix<typename aVec::value_type, -1, -1>> res;
+    auto res1 = lanczos_saad(A, m , aR);
+    res.v = res1.v;
+    res.ev = res1.ev;
   return res;
 }
 #endif

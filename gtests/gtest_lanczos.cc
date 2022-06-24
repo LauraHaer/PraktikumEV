@@ -28,11 +28,13 @@ TEST(LANCZOS, InputIsValid) {
 }
 
 //TEST(LANCZOS, IncompatibleDataType) {
+//  int n = 4;
 //  result_lanczos<Eigen::MatrixXd> res;
-//  Eigen::VectorXd v1 = Eigen::VectorXd::Zero(16);
+//  Eigen::VectorXd v1 = Eigen::VectorXd::Zero(n*n);
 //  v1(0) = 1;
 //  Eigen::SparseMatrix<float> L1Mat;
 //  L1Mat = CreateLaplaceMatrix<Eigen::SparseMatrix<float>>(n);
+//  L1Mat * (double)3.0;
 //  res = lanczos(L1Mat, 10, v1);
 //}
 

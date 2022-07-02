@@ -55,11 +55,11 @@ result_lanczos_saad<Eigen::Matrix<typename aVec::value_type, -1, -1>> lanczos_sa
     if (std::abs(b_ip1 - 0) <= 1e-16) break;  // line 6
     v.col(i + 1) = w_i / b_ip1;
   }
-  // std::cout << "TMat = " << TMat << std::endl;
+  std::cout << "TMat = " << TMat << std::endl;
   result_lanczos_saad<tmpMat> res;
   res.v = v;
   Eigen::EigenSolver<tmpMat> es(TMat);
-  // std::cout << "the evs are " << es.eigenvalues() << std::endl;
+   std::cout << "the evs are " << es.eigenvalues() << std::endl;
   res.ev = es.eigenvalues();
   return res;
 }

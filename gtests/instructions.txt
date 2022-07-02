@@ -1,0 +1,3 @@
+Find out all tests: ./gtests/gtests --gtest_list_tests
+
+Run Selected tests: ./gtests/gtests --gtest_filter=Lanczos.*

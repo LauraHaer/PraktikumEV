@@ -60,9 +60,6 @@ Eigen::MatrixXd givens_q(aMat A) {
 
 template <class aVec>
 aVec tridiag_ev_solver(aVec diag, aVec sdiag) {
-  typedef Eigen::Triplet<double> T;
-  int n = diag.rows() - 1;
-
   // build T with given diagonal and subdiagonal
   Eigen::MatrixXd TMat = createTMatrix(diag, sdiag);
   // document error as maximum of subdiagonal,

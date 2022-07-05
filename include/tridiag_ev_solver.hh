@@ -75,4 +75,12 @@ aVec tridiag_ev_solver(aVec diag, aVec sdiag) {
   return TMat.diagonal();
 }
 
+
+aVec inverseIteration(const aMat T, const double mu) {
+    for (int i = 0; i<std::sqrt(T.cols()); i++) {   //when converged?
+        x = (T - mu * Eigen::MatrixXd::Identity(n, n)).inverse() * x; //inverse function of eigen uses LU decomposition
+    }
+    return x;
+}
+
 #endif

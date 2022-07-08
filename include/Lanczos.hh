@@ -22,7 +22,7 @@
 template <class DeMat>
 struct result_lanczos {
   DeMat v;
-  Eigen::VectorXcd ev;
+  Eigen::VectorXd ev;
   Eigen::MatrixXd vec;
 };
 
@@ -88,9 +88,9 @@ auto simple_lanczos(const aMat& A, const int& m, const aVec& aR,
   result_lanczos<Eigen::Matrix<typename aVec::value_type, -1, -1>> res;
   res.v = v;
   res.ev = tridiag_ev_solver(alpha, beta);
-  res.vec = Eigen::MatrixXd::Zeros(res.ev.cols()),
+  res.vec(res.ev.cols(), res.ev.cols());
   for (int i = 0; i < res.ev.cols(); i++) {
-    res.vec.col(i) = inverseIteration(TMat, res.ev(i));
+    res.vec.col(i) = inverseIteration(createTMatrix(alpha, beta), res.ev(i).real());
   }
   return res;
 }
@@ -136,9 +136,10 @@ auto lanczos_ir(const aMat& A, const int& m, const aVec& aR, const int& k,
   alpha(Eigen::lastN(m)) = TMat.diagonal();
   beta(Eigen::lastN(m-1)) = TMat.diagonal(1);
   res.ev = tridiag_ev_solver(alpha, beta);
-  res.vec = tmpMat::Zeros(res.ev.cols());
+  res.vec(res.ev.cols(), res.ev.cols());
   for (int i = 0; i < res.ev.cols(); i++) {
-    res.vec.col(i) = inverseIteration(TMat, res.ev(i));
+//    res.vec.col(i) = inverseIteration(TMat, res.ev(i).real());
+    res.vec.col(i) = inverseIteration(createTMatrix(alpha, beta), res.ev(i).real());
   }
   return res;
   }

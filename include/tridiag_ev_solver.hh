@@ -78,12 +78,14 @@ aVec tridiag_ev_solver(aVec diag, aVec sdiag) {
 
 template <class aMat>
 Eigen::VectorXd inverseIteration(const aMat T, const double mu, const double eps = 1e-8) {
-  Eigen::VectorXd x_prev = Eigen::VectorXd::Zeros();
-  while(double e > eps) {  
-    Eigen::VectorXd x = (T - mu * Eigen::MatrixXd::Identity(n, n)).inverse() * x; 
+  Eigen::VectorXd x_prev = Eigen::VectorXd::Zero(T.cols());
+  double e;
+  Eigen::VectorXd x;
+  do {
+    x = (T - mu * Eigen::MatrixXd::Identity(T.cols(), T.cols())).inverse() * x;
     e = (x-x_prev).norm();
     x_prev = x;
-  }
+  } while( e > eps );
   return x;
 }
 

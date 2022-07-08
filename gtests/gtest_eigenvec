@@ -1,0 +1,47 @@
+TEST(INVERSE_ITERATION, CalculateFromRandomFullDense) {
+  std::srand(std::time(nullptr));
+  int m = std::rand() % 5 + 5;
+  int n = m * 2;
+  Eigen::MatrixXd A = Eigen::MatrixXd::Random(n,n);
+  A = A + A.transpose().eval();
+  Eigen::EigenSolver<Eigen::MatrixXd> es(A);
+  auto eigenvalues = es.eigenvalues();
+  auto eigenvectors = es.eigenvectors();
+
+  Eigen::MatrixXd vecs(eigenvalues.cols(),eigenvalues.cols());
+  for (int i = 0; i < eigenvalues.cols(), i++) {
+    vecs.col(i) = inverseIteration(A, eigenvalues(i))
+  }
+  mos << "Eigen calculated eigenvectors" << std::endl;
+  std::cout << eigenvectors << ", ";
+  std::cout << std::endl;
+  mos << "inverse iteration eigenvectors" << std::endl;
+  std::cout << vecs << ", ";
+  std::cout << std::endl;
+  //EXPECT_LE(std::abs(res.ev[0].real() - eigenvalues[0].real()), 1e-8 );
+
+}
+
+TEST(INVERSE_ITERATION, CalculateFromDenseDiagonal) {
+  std::srand(std::time(nullptr));
+  int m = std::rand() % 5 + 5;
+  int n = m * 2;
+  Eigen::MatrixXd A = Eigen::MatrixXd::Identity(n,n);
+  A.diagonal().setRandom();
+  Eigen::EigenSolver<Eigen::MatrixXd> es(A);
+  auto eigenvalues = es.eigenvalues();;
+  auto eigenvectors = es.eigenvectors();
+
+  Eigen::MatrixXd vecs(eigenvalues.cols(),eigenvalues.cols());
+  for (int i = 0; i < eigenvalues.cols(), i++) {
+    vecs.col(i) = inverseIteration(A, eigenvalues(i))
+  }
+  /*mos << "Eigen calculated eigenvectors" << std::endl;
+  std::cout << eigenvectors << ", ";
+  std::cout << std::endl;*/
+  mos << "inverse iteration eigenvectors" << std::endl;
+  std::cout << vecs << ", ";
+  std::cout << std::endl;
+  //EXPECT_LE(std::abs(res.ev[0].real() - eigenvalues[0].real()), 1e-8 );
+
+}

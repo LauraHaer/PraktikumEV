@@ -23,6 +23,7 @@ template <class DeMat>
 struct result_lanczos {
   DeMat v;
   Eigen::VectorXcd ev;
+  Eigen::MatrixXd vec;
 };
 
 /// Computes the Lanczos factorisation of A, starting at the k+1 step
@@ -87,6 +88,10 @@ auto simple_lanczos(const aMat& A, const int& m, const aVec& aR,
   result_lanczos<Eigen::Matrix<typename aVec::value_type, -1, -1>> res;
   res.v = v;
   res.ev = tridiag_ev_solver(alpha, beta);
+  res.vec = Eigen::MatrixXd::Zeros(res.ev.cols()),
+  for (int i = 0; i < res.ev.cols(); i++) {
+    res.vec.col(i) = inverseIteration(TMat, res.ev(i));
+  }
   return res;
 }
 
@@ -125,6 +130,7 @@ auto lanczos_ir(const aMat& A, const int& m, const aVec& aR, const int& k,
     TMat(Eigen::seqN(0, k), Eigen::seqN(0, k)) = tk;
     //mos << PRINT_REFLECTION(TMat) << std::endl;
     //std::getchar();
+
   }
 
   result_lanczos<Eigen::Matrix<typename aVec::value_type, -1, -1>> res;
@@ -132,6 +138,10 @@ auto lanczos_ir(const aMat& A, const int& m, const aVec& aR, const int& k,
   alpha(Eigen::lastN(m)) = TMat.diagonal();
   beta(Eigen::lastN(m-1)) = TMat.diagonal(1);
   res.ev = tridiag_ev_solver(alpha, beta);
+  res.vec = Eigen::MatrixXd::Zeros(res.ev.cols());
+  for (int i = 0; i < res.ev.cols(); i++) {
+    res.vec.col(i) = inverseIteration(TMat, res.ev(i));
+  }
   return res;
   }
 #endif

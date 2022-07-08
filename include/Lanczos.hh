@@ -107,20 +107,18 @@ auto lanczos_ir(const aMat& A, const int& m, const aVec& aR, const int& k,
   auto [alpha, beta, vm, rm] = lanczos_factorization(A, m, aR, aRho);  // Step (2)
   //vm = vm(Eigen::all, Eigen::lastN(m));
   auto TMat = createTMatrix(alpha, beta);
-  //mos << PRINT_REFLECTION(TMat) << std::endl;
+
   while (TMat(Eigen::seqN(0,k), Eigen::seqN(0,k)).diagonal(1).maxCoeff() >= aEps) {  // Step (3)
     auto eigenvalues = tridiag_ev_solver(alpha, beta); // Select last p eigenvalues
     std::sort(eigenvalues.begin(), eigenvalues.end(), greaterEigenvalue);
-    Eigen::MatrixXd Q = Eigen::MatrixXd::Identity(m,m);
+    tmpMat Q = tmpMat::Identity(m,m);
     for (int j=k; j < m; ++j) {
-      Eigen::MatrixXd tmp_input = TMat - eigenvalues[j] * Eigen::MatrixXd::Identity(m,m);
-      //auto Qj = qr.householderQ();
-      Eigen::MatrixXd Qj = givens_q(tmp_input);
+      tmpMat tmp_input = TMat - eigenvalues[j] * tmpMat::Identity(m,m);
+      tmpMat Qj = givens_q(tmp_input);
       TMat = Qj.transpose() * TMat * Qj;
       Q = Q * Qj;
     }
     aVec rk = vm.col(k+1) * TMat(k, k-1) + rm*eigenvalues[k-1] * Q(m-1,k-1); // Step (10)
-    //mos << PRINT_REFLECTION(rk) << std::endl;
     tmpMat vk = vm(Eigen::all, Eigen::lastN(m)) * Q(Eigen::all, Eigen::seqN(0, k));
     tmpMat tk = TMat(Eigen::seqN(0, k), Eigen::seqN(0, k));
     vm = tmpMat::Zero(aR.rows(), m + 1);
@@ -128,7 +126,7 @@ auto lanczos_ir(const aMat& A, const int& m, const aVec& aR, const int& k,
     std::tie(alpha, beta, vm, rm) = lanczos_factorization(A, m, rk, aRho, vm, k);  // Step (2)
     TMat = createTMatrix(alpha, beta);
     TMat(Eigen::seqN(0, k), Eigen::seqN(0, k)) = tk;
-    //mos << PRINT_REFLECTION(TMat) << std::endl;
+
     //std::getchar();
 
   }
@@ -138,7 +136,7 @@ auto lanczos_ir(const aMat& A, const int& m, const aVec& aR, const int& k,
   alpha(Eigen::lastN(m)) = TMat.diagonal();
   beta(Eigen::lastN(m-1)) = TMat.diagonal(1);
   res.ev = tridiag_ev_solver(alpha, beta);
-  res.vec = Eigen::MatrixXd::Zeros(res.ev.cols());
+  res.vec = tmpMat::Zeros(res.ev.cols());
   for (int i = 0; i < res.ev.cols(); i++) {
     res.vec.col(i) = inverseIteration(TMat, res.ev(i));
   }

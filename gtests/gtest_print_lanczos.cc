@@ -61,6 +61,19 @@ TEST(LANCZOS_IR_EV, CalculateFromRandomDense) {
 }
 
 
-//TEST(LANCZOS_IR_EV, CalculateFromRandomDiagonal) {
-//}
+TEST(LANCZOS_IR_EV, CalculateFromRandomDiagonal) {
+  std::vector<int> MatrixSize{15,40,60};
+  std::vector<int> NumberOfEigenvalues{2,6,10};
+  std::vector<int> NumberOfTmpEigenvalues{10,20,50};
+  bool print_result = true;
+
+  for(int i= 0; i < (int)MatrixSize.size(); ++i ) {
+    auto A = CreateRandomDiagonal(MatrixSize.at(i), 42*i);
+    Eigen::VectorXd v1 = Eigen::VectorXd::Zero(MatrixSize.at(i));
+    v1(0) = 1;
+    std::vector<double> error = runLanczos(A, v1, NumberOfTmpEigenvalues.at(i), NumberOfEigenvalues.at(i), 1, 1e-8, false, print_result);
+    //EXPECT_LE(error.at(0), 1e-10);
+    //EXPECT_LE(*std::max_element(error.begin(), error.end()), 1e-5);
+  }
+}
 

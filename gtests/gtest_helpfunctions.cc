@@ -1,4 +1,5 @@
 #include "gtest_helpfunctions.hh"
+#include <iostream>
 
 Eigen::SparseMatrix<double> CreateRandomSparse(const int aN, const int aEntries,
                                                const int aSeed) {
@@ -22,8 +23,8 @@ Eigen::MatrixXd CreateRandomDense(const int aN, const int aSeed) {
 
 Eigen::MatrixXd CreateRandomDiagonal(const int aN, const int aSeed) {
   std::srand(aSeed);
-  auto A = Eigen::MatrixXd::Zero(aN, aN);
-  auto diag = Eigen::VectorXd::Random(aN);
+  Eigen::MatrixXd A = Eigen::MatrixXd::Zero(aN, aN);
+  Eigen::VectorXd diag = Eigen::VectorXd::Random(aN);
   A.diagonal() = diag;
   return A;
 }

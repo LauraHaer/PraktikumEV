@@ -89,20 +89,20 @@ Eigen::VectorXd inverseIteration(const aMat T, const double mu, const double eps
   return x;
 }
 
-template <class aMat, class aVec>
-Eigen::MatrixXd eigenvectorsA(aMat T, aVec ev, aMat v) {
-  v = v(Eigen::all, Eigen::lastN(ev.cols()))
-  Eigen::MatrixXd vec(ev.cols(), ev.cols());
-  
-  for (int i = 0; i < res.ev.cols(); i++) {
-//    res.vec.col(i) = inverseIteration(TMat, res.ev(i).real());
-    //compute eigenvectors of T
-    vec.col(i) = inverseIteration(t, ev(i));
-    //compute eigenvectors of A from eigenvectors of T
-    vec.col(i) = v*vec.col(i);
-  }
-  
-  for 
-}
+//template <class aMat, class aVec>
+//Eigen::MatrixXd eigenvectorsA(aMat T, aVec ev, aMat v) {
+//  v = v(Eigen::all, Eigen::lastN(ev.cols()));
+//  Eigen::MatrixXd vec(ev.cols(), ev.cols());
+//
+//  for (int i = 0; i < res.ev.cols(); i++) {
+////    res.vec.col(i) = inverseIteration(TMat, res.ev(i).real());
+//    //compute eigenvectors of T
+//    vec.col(i) = inverseIteration(t, ev(i));
+//    //compute eigenvectors of A from eigenvectors of T
+//    vec.col(i) = v*vec.col(i);
+//  }
+//
+//  for
+//}
 
 #endif

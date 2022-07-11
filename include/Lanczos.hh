@@ -4,6 +4,7 @@
 #include <Eigen/Dense>
 #include <Eigen/Eigenvalues>
 #include <Eigen/Sparse>
+#include <type_traits>        // std::is_same_v
 #include <cassert>
 #include <cmath>
 #include <iostream>
@@ -13,6 +14,9 @@
 #include "tridiag_ev_solver.hh"
 #include "standard_include.hh"
 #include "helpfunctions.hh"
+
+//Trace how often the reorthogonalization fails
+#define trace_reorthogonalization
 
 /// Computes `m` Ritz values for a given **Hermitian** matrix.
 /// @param A: Target Matrix
@@ -42,8 +46,7 @@ auto lanczos_factorization(const aMat& A, const int& m, const aVec& aR,
   if (aV.rows() == 0) aV = tmpMat::Zero(aR.rows(), m + 1);
   assert("Matrix must be quadratic" &&  A.cols() == A.rows());
   assert("aR and A must have the same number of rows" &&  A.cols() == aR.rows());
-  //static_assert(std::is_same(typeid(typename aMat::value_type),
-  //               typeid(typename aVec::value_type)));
+  static_assert("A, and aR must have store the same data type" && std::is_same_v<typename aMat::value_type, typename aVec::value_type>);
   assert("Number of calc Eigenvalues must be <= dim(A)" && m <= aR.rows());
 
   aVec r = aR;
@@ -52,22 +55,23 @@ auto lanczos_factorization(const aMat& A, const int& m, const aVec& aR,
   beta(k) = r.norm();
   tmpMat v = aV;
 
+#ifdef trace_reorthogonalization
+      int number_of_reorthorthogonalization_fails = 0;
+#endif
+
   // the algorithm
   for (int i = k+1; i <= m; ++i) {
-//    mos << "Start of loop" << std::endl;
-//    mos << PRINT_REFLECTION(r) << std::endl;
     v.col(i) = r / r.norm();                        // Step (3)
     r = A * v.col(i) - v.col(i - 1) * beta(i - 1);  // Step (4)
-//    mos << PRINT_REFLECTION(r) << std::endl;
     alpha(i) = v.col(i).dot(r);                     // Step (5)
     r = r - v.col(i) * alpha(i);                    // Step (6)
-//    mos << PRINT_REFLECTION(r) << std::endl;
     beta(i) = r.norm();
     for(int ii = 0; ii < 6; ++ii) {
-      if (ii == 5) std::cout << "Reorthogonalisation failed" << std::endl;
+#ifdef trace_reorthogonalization
+      if (ii == 5) ++number_of_reorthorthogonalization_fails;
+#endif
       if (r.norm() <
           aRho * sqrt(std::pow(alpha(i), 2) + std::pow(beta(i - 1), 2))) {
-        //mos << "Reorthogonalisation required:" << PRINT_REFLECTION(ii) << std::endl;
         Eigen::Matrix<aData, -1, 1> s = v.transpose() * r;  // Step (8)
         r = r - v * s;                                      // Step (9)
         alpha(i) = alpha(i) + s(i);
@@ -77,6 +81,9 @@ auto lanczos_factorization(const aMat& A, const int& m, const aVec& aR,
       }
     }
   }
+#ifdef trace_reorthogonalization
+      std::cout << "Reorthogonalisation failed: " << number_of_reorthorthogonalization_fails << " times." << std::endl;
+#endif
   return std::make_tuple(alpha, beta, v, r);
 }
 
@@ -85,9 +92,8 @@ auto simple_lanczos(const aMat& A, const int& m, const aVec& aR,
                     const double& aRho = 1.0) {
   auto [alpha, beta, v, r] = lanczos_factorization(A, m, aR, aRho);  // Step (2)
   result_lanczos<Eigen::Matrix<typename aVec::value_type, -1, -1>> res;
-  res.v = v;
   res.ev = tridiag_ev_solver(alpha, beta);
-  res.vec = eigenvectorsA(createTMatrix(alpha, beta), res.ev)
+  //res.vec = eigenvectorsA(createTMatrix(alpha, beta), res.ev);
   return res;
 }
 
@@ -128,11 +134,10 @@ auto lanczos_ir(const aMat& A, const int& m, const aVec& aR, const int& k,
   }
 
   result_lanczos<Eigen::Matrix<typename aVec::value_type, -1, -1>> res;
-  res.v = vm;
   alpha(Eigen::lastN(m)) = TMat.diagonal();
   beta(Eigen::lastN(m-1)) = TMat.diagonal(1);
   res.ev = tridiag_ev_solver(alpha, beta);
-  res.vec = eigenvectorsA(createTMatrix(alpha, beta), res.ev)
+  //res.vec = eigenvectorsA(createTMatrix(alpha, beta), res.ev);
   return res;
   }
 #endif

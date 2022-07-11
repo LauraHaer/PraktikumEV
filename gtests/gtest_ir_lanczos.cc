@@ -7,7 +7,6 @@
 #include <cstdlib>
 
 #include "Lanczos.hh"
-#include "create_laplace_matrix.hh"
 #include "helpfunctions.hh"
 #include "standard_include.hh"
 
@@ -29,7 +28,7 @@ TEST(LANCZOS_IR, CalculateFromFixedDenseDiagonal) {
   mos << "Lanczos calculated eigenvalues" << std::endl;
   for( int i =0; i < m; ++i) std::cout << res.ev[i] << ", ";
   std::cout << std::endl;
-  EXPECT_LE(std::abs(res.ev[0].real() - eigenvalues[0].real()), 1e-8 );
+  EXPECT_LE(std::abs(res.ev[0] - eigenvalues[0].real()), 1e-8 );
 }
 
 
@@ -50,7 +49,7 @@ TEST(LANCZOS_IR, CalculateFromDenseDiagonal) {
   mos << "Lanczos calculated eigenvalues" << std::endl;
   for( int i =0; i < m; ++i) std::cout << res.ev[i] << ", ";
   std::cout << std::endl;
-  EXPECT_LE(std::abs(res.ev[0].real() - eigenvalues[0].real()), 1e-8 );
+  EXPECT_LE(std::abs(res.ev[0] - eigenvalues[0].real()), 1e-8 );
 
 }
 
@@ -71,7 +70,7 @@ TEST(LANCZOS_IR, CalculateFromRandomFullDense) {
   mos << "Lanczos calculated eigenvalues" << std::endl;
   for( int i =0; i < m; ++i) std::cout << res.ev[i] << ", ";
   std::cout << std::endl;
-  EXPECT_LE(std::abs(res.ev[0].real() - eigenvalues[0].real()), 1e-8 );
+  EXPECT_LE(std::abs(res.ev[0] - eigenvalues[0].real()), 1e-8 );
 
 }
 
@@ -99,7 +98,7 @@ TEST(LANCZOS_IR, CalculateFromRandomSparse) {
   mos << "Lanczos calculated eigenvalues" << std::endl;
   for( int i =0; i < m; ++i) std::cout << res.ev[i] << ", ";
   std::cout << std::endl;
-  EXPECT_LE(std::abs(res.ev[0].real() - eigenvalues[0].real()), 1e-8 );
+  EXPECT_LE(std::abs(res.ev[0] - eigenvalues[0].real()), 1e-8 );
 
 }
 
@@ -120,7 +119,7 @@ TEST(SIMPLE_LANCZOS, CalculateFromDenseDiagonal) {
   mos << "Lanczos calculated eigenvalues" << std::endl;
   for( int i =0; i < m; ++i) std::cout << res.ev[i] << ", ";
   std::cout << std::endl;
-  EXPECT_LE(std::abs(res.ev[0].real() - eigenvalues[0].real()), 1e-8 );
+  EXPECT_LE(std::abs(res.ev[0] - eigenvalues[0].real()), 1e-8 );
 
 }
 
@@ -141,7 +140,7 @@ TEST(SIMPLE_LANCZOS, CalculateFromDenseDiagonalWithoutReorthogonalization) {
   mos << "Lanczos calculated eigenvalues" << std::endl;
   for( int i =0; i < m; ++i) std::cout << res.ev[i] << ", ";
   std::cout << std::endl;
-  EXPECT_LE(std::abs(res.ev[0].real() - eigenvalues[0].real()), 1e-8 );
+  EXPECT_LE(std::abs(res.ev[0] - eigenvalues[0].real()), 1e-8 );
 
 }
 
@@ -162,7 +161,7 @@ TEST(SIMPLE_LANCZOS, CalculateFromRandomFullDense) {
   mos << "Lanczos calculated eigenvalues" << std::endl;
   for( int i =0; i < m; ++i) std::cout << res.ev[i] << ", ";
   std::cout << std::endl;
-  EXPECT_LE(std::abs(res.ev[0].real() - eigenvalues[0].real()), 1e-8 );
+  EXPECT_LE(std::abs(res.ev[0] - eigenvalues[0].real()), 1e-8 );
 
 }
 
@@ -190,7 +189,7 @@ TEST(SIMPLE_LANCZOS, CalculateFromRandomSparse) {
   mos << "Lanczos calculated eigenvalues" << std::endl;
   for( int i =0; i < m; ++i) std::cout << res.ev[i] << ", ";
   std::cout << std::endl;
-  EXPECT_LE(std::abs(res.ev[0].real() - eigenvalues[0].real()), 1e-8 );
+  EXPECT_LE(std::abs(res.ev[0] - eigenvalues[0].real()), 1e-8 );
 
 }
 

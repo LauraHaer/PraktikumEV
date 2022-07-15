@@ -31,7 +31,7 @@ TEST(INVERSE_ITERATION, CalculateFromRandomFullDense) {
   mos << "inverse iteration eigenvectors" << std::endl;
   std::cout << vecs << ", ";
   std::cout << std::endl;
-  //EXPECT_LE(std::abs(res.ev[0].real() - eigenvalues[0].real()), 1e-8 );
+  EXPECT_LE(std::abs(res.ev[0].real() - eigenvalues[0].real()), 1e-8 );
 
 }
 
@@ -55,6 +55,6 @@ TEST(INVERSE_ITERATION, CalculateFromDenseDiagonal) {
   mos << "inverse iteration eigenvectors" << std::endl;
   std::cout << vecs << ", ";
   std::cout << std::endl;
-  //EXPECT_LE(std::abs(res.ev[0].real() - eigenvalues[0].real()), 1e-8 );
+  EXPECT_LE(std::abs(res.ev[0].real() - eigenvalues[0].real()), 1e-8 );
 
 }

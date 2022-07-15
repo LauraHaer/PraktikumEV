@@ -16,7 +16,7 @@ SET(_main_target praktikum)
 SET(_main "")
 #SET(CMAKE_CXX_FLAGS_DEBUG_INIT "-Wall")
 add_compile_options(
-  "-Wall" "-Wpedantic" "-Wextra" "-fexceptions" "-Wfloat-equal"
+  "-Wall" "-Wpedantic" "-Wextra" "-fexceptions" "-Wfloat-equal" "-std=c++17"
   "$<$<CONFIG:DEBUG>:-O0;-g3;-ggdb>"
 )
 ############################################################
@@ -38,7 +38,7 @@ CMAKE_MINIMUM_REQUIRED(VERSION 3.10)
 
 PROJECT(${_main_target})
 
-find_package (Eigen3 3.3 REQUIRED)
+find_package (Eigen3 3.4 REQUIRED)
 INCLUDE_DIRECTORIES( EIGEN3_INCLUDE_DIR )
 
 #add_executable (example example.cpp)

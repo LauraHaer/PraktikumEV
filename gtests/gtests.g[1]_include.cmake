@@ -1,0 +1,5 @@
+if(EXISTS "/mnt/c/Users/laura/OneDrive/Documents/1_Studium/Sem8_SS22/Fortgeschrittenenpraktikum/unsergit_clone/PraktikumEV/gtests/gtests.g[1]_tests.cmake")
+  include("/mnt/c/Users/laura/OneDrive/Documents/1_Studium/Sem8_SS22/Fortgeschrittenenpraktikum/unsergit_clone/PraktikumEV/gtests/gtests.g[1]_tests.cmake")
+else()
+  add_test(gtests.g_NOT_BUILT gtests.g_NOT_BUILT)
+endif()

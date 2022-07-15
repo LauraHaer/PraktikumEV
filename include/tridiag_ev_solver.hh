@@ -20,10 +20,10 @@ Eigen::MatrixXd createTMatrix(aVec diag, aVec sdiag) {
 
   // build T with given diagonal and subdiagonal
   Eigen::MatrixXd TMat = Eigen::MatrixXd::Zero(n, n);
-//  TMat.diagonal(1) = sdiag(Eigen::seqN(1, n - 1));
-//  TMat.diagonal(-1) = sdiag(Eigen::seqN(1, n - 1));
-//  TMat.diagonal() = diag(Eigen::lastN(n));
-//
+  TMat.diagonal(1) = sdiag(Eigen::seqN(1, n - 1));
+  TMat.diagonal(-1) = sdiag(Eigen::seqN(1, n - 1));
+  TMat.diagonal() = diag(Eigen::lastN(n));
+
   return TMat;
 }
 
@@ -81,17 +81,17 @@ Eigen::VectorXd inverseIteration(const aMat T, const double mu, const double eps
   Eigen::VectorXd x_prev = Eigen::VectorXd::Zero(T.cols());
   double e1 = 1;
   double e2 = 1;
-  
+
   Eigen::VectorXd x = Eigen::VectorXd::Random(T.cols());
   while( e1 > eps && e2 > eps ) {
     x = (T - (mu * Eigen::MatrixXd::Identity(T.cols(), T.cols()))).inverse() * x;
     x = x.normalized();
-    
+
     e1 = (x - x_prev).norm();
     e2 = (x - (x_prev * (-1))).norm();
 
     x_prev = x;
-  } 
+  }
   return x;
 }
 

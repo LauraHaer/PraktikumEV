@@ -54,6 +54,7 @@ auto lanczos_factorization(
       "A, and aR must have store the same data type" &&
       std::is_same_v<typename aMat::value_type, typename aVec::value_type>);
   assert("Number of calc Eigenvalues must be <= dim(A)" && m <= aR.rows());
+  assert("aRho must be positive" && aRho >= 0);
 
   aVec r = aR;
   Eigen::Matrix<aData, -1, 1> beta = Eigen::Matrix<aData, -1, 1>::Zero(m + 1);
@@ -74,58 +75,32 @@ auto lanczos_factorization(
     beta(i) = r.norm();
     if (r.norm() <
         aRho * sqrt(std::pow(alpha(i), 2) + std::pow(beta(i - 1), 2))) {
-//      mos << "Reorthogonalisation" << std::endl;
-//      mos << PRINT_REFLECTION(v) << std::endl;
       Eigen::Matrix<aData, -1, 1> s = v.transpose() * r;  // Step (8)
-//      std::cout << PRINT_REFLECTION(i) << std::endl;
-//      std::cout << PRINT_REFLECTION(s) << std::endl;
-//      std::cout << PRINT_REFLECTION(r) << std::endl;
-//      std::cout << PRINT_REFLECTION(s.norm()) << std::endl;
-//      std::cout << PRINT_REFLECTION(alpha(i)) << std::endl;
-//      std::cout << PRINT_REFLECTION(beta(i-1)) << std::endl;
-      r = r - v * s;                                      // Step (9)
-      alpha(i) = alpha(i) + s(i);
-      beta(i) = beta(i) + s(i - 1);
-      for (int ii = 0; ii < 5; ++ii) {
-        if (ii == 4) {
+      for (int ii = 0; ii < 6; ++ii) {
+        if (ii == 5) {
 #ifdef trace_reorthogonalization
           ++number_of_reorthorthogonalization_fails;
 #endif
           beta(i) = 0;
           alpha(i) = 0;
           r = aVec::Random(aR.rows());
-          aVec r_new = r;
           ii = -1;
-          //          for (int iii = 1; iii <= i; ++iii) {
-          //            r = r - v.col(iii) * (v.col(iii).dot(r_new) /
-          //            v.col(iii).norm());
-          //          }
-          //          beta(i) = r.norm();
-//          std::cout << "redo" << std::endl;
         }
-//        std::cout << PRINT_REFLECTION(i) << std::endl;
-//        std::cout << PRINT_REFLECTION(s) << std::endl;
-//        std::cout << PRINT_REFLECTION(r) << std::endl;
-//        std::cout << PRINT_REFLECTION(s.norm()) << std::endl;
         if (beta(i) < aRho * s.norm()) {
           s = v.transpose() * r;  // Step (8)
-          r = r - v * s;                                      // Step (9)
+          r = r - v * s;          // Step (9)
           alpha(i) = alpha(i) + s(i);
           beta(i) = beta(i) + s(i - 1);
         } else {
           break;
         }
-//      } else {
-//        std::cout << "Res found" << std::endl;
-//        break;
-//      }
       }
     }
   }
 #ifdef trace_reorthogonalization
-    std::cout << "Reorthogonalisation failed: "
-              << number_of_reorthorthogonalization_fails << " times."
-              << std::endl;
+  std::cout << "Reorthogonalisation failed: "
+            << number_of_reorthorthogonalization_fails << " times."
+            << std::endl;
 #endif
   return std::make_tuple(alpha, beta, v, r);
 }
@@ -149,6 +124,7 @@ auto lanczos_ir(const aMat& A, const int& m, const aVec& aR, const int& k,
 
   assert("Kept number of eigenvalues must be <= calculated eigenvalues" &&
          k < m);
+  assert("aEps must be positive" && aEps >= 0);
   auto [alpha, beta, vm, rm] =
       lanczos_factorization(A, m, aR, aRho);  // Step (2)
   // vm = vm(Eigen::all, Eigen::lastN(m));

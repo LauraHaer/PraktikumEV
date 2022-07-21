@@ -15,6 +15,9 @@ Eigen::SparseMatrix<double> CreateRandomSparse(
 Eigen::MatrixXd CreateRandomDense(const int aN,
                                   const int aSeed = std::time(nullptr));
 
+Eigen::MatrixXd CreateStdRandom(const int aN,
+                                  const int aSeed = std::time(nullptr));
+
 Eigen::MatrixXd CreateRandomDiagonal(const int aN,
                                      const int aSeed = std::time(nullptr));
 

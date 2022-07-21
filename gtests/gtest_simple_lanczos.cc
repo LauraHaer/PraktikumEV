@@ -74,7 +74,7 @@ TEST(SIMPLE_LANCZOS, CalculateFromRandomFullDense) {
   std::srand(std::time(nullptr));
   int m = std::rand() % 5 + 5;
   int n = m * 2;
-  Eigen::MatrixXd A = CreateRandomDense(n);
+  Eigen::MatrixXd A = CreateStdRandom(n);
 
   Eigen::EigenSolver<Eigen::MatrixXd> es(A);
   auto eigenvalues = es.eigenvalues();

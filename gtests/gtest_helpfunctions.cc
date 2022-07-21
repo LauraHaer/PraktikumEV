@@ -29,3 +29,16 @@ Eigen::MatrixXd CreateRandomDiagonal(const int aN, const int aSeed) {
   A.diagonal() = diag;
   return A;
 }
+
+Eigen::MatrixXd CreateStdRandom(const int aN, const int aSeed) {
+  std::srand(aSeed);
+  Eigen::MatrixXd A(aN, aN);
+  for (int i = 0; i<aN; i++) {
+    for (int j=0; j<= i; j++) {
+      int x = std::rand();
+      A(i,j) = x;
+      A(j,i) = x;
+    }
+  }
+  return A;
+}

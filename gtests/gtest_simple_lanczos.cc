@@ -21,16 +21,13 @@ TEST(SIMPLE_LANCZOS, CalculateSmallEVWithGivenEigenvector) {
   Eigen::VectorXd v1{{-1.0, 0.0, 1.0, -1.0, 1.0}};
   //result_lanczos<Eigen::MatrixXd> res = lanczos_ir(A, n, v1, 1);
   std::cout << v1 << std::endl;
-  result_lanczos<Eigen::MatrixXd> res = simple_lanczos(A, n, v1,0);
-
-  auto res2 = lanczos_saad(A, n, v1);
-  EXPECT_DOUBLE_EQ(res2.ev[0].real(), 5.0);
+  result_lanczos<Eigen::MatrixXd> res = simple_lanczos(A, n, v1, 0.9);
 
   std::cout << res.ev << std::endl;
   EXPECT_DOUBLE_EQ(res.ev[0], 5.0);
 }
 
-TEST(SIMPLE_LANCZOS, DISABLED_CalculateFromDenseDiagonal) {
+TEST(SIMPLE_LANCZOS, CalculateFromDenseDiagonal) {
   std::srand(std::time(nullptr));
   int m = std::rand() % 5 + 5;
   int n = m * 2;
@@ -72,7 +69,7 @@ TEST(SIMPLE_LANCZOS, DISABLED_CalculateFromDenseDiagonalWithoutReorthogonalizati
 
 }
 
-TEST(SIMPLE_LANCZOS, DISABLED_CalculateFromRandomFullDense) {
+TEST(SIMPLE_LANCZOS, CalculateFromRandomFullDense) {
   std::srand(std::time(nullptr));
   int m = std::rand() % 5 + 5;
   int n = m * 2;

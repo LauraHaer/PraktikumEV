@@ -75,18 +75,21 @@ auto lanczos_factorization(
     beta(i) = r.norm();
     if (r.norm() <
         aRho * sqrt(std::pow(alpha(i), 2) + std::pow(beta(i - 1), 2))) {
-      Eigen::Matrix<aData, -1, 1> s = v.transpose() * r;  // Step (8)
+        Eigen::Matrix<aData, -1, 1> s = v.transpose() * r;  // Step (8)
+        r = r - v * s;          // Step (9)
+        alpha(i) = alpha(i) + s(i);
+        beta(i) = beta(i) + s(i - 1);
       for (int ii = 0; ii < 6; ++ii) {
         if (ii == 5) {
 #ifdef trace_reorthogonalization
           ++number_of_reorthorthogonalization_fails;
 #endif
           beta(i) = 0;
-          alpha(i) = 0;
           r = aVec::Random(aR.rows());
           ii = -1;
         }
-        if (beta(i) < aRho * s.norm()) {
+        //if (beta(i) <= aRho * s.norm()) {
+        if (r.norm() <= aRho * s.norm()) {
           s = v.transpose() * r;  // Step (8)
           r = r - v * s;          // Step (9)
           alpha(i) = alpha(i) + s(i);

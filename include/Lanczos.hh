@@ -84,7 +84,7 @@ auto lanczos_factorization(
 #endif
           beta(i) = 0;
           r = aVec::Random(aR.rows());
-          //++i;
+          ++i;
           if (i >= m) break;
           ii = 0;
         }
@@ -112,8 +112,6 @@ auto simple_lanczos(const aMat& A, const int& m, const aVec& aR,
                     const double& aRho = 1.0) {
   auto [alpha, beta, v, r] = lanczos_factorization(A, m, aR, aRho);  // Step (2)
   result_lanczos<Eigen::Matrix<typename aVec::value_type, -1, -1>> res;
-  mos << PRINT_REFLECTION(alpha) << std::endl;
-  mos << PRINT_REFLECTION(beta) << std::endl;
   res.ev = tridiag_ev_solver(alpha, beta);
   // res.vec = eigenvectorsA(createTMatrix(alpha, beta), res.ev);
   return res;

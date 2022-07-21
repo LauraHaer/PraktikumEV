@@ -17,8 +17,9 @@ Eigen::SparseMatrix<double> CreateRandomSparse(const int aN, const int aEntries,
 
 Eigen::MatrixXd CreateRandomDense(const int aN, const int aSeed) {
   std::srand(aSeed);
-  auto A = Eigen::MatrixXd::Random(aN, aN);
-  return A + A.transpose().eval();
+  Eigen::MatrixXd A = Eigen::MatrixXd::Random(aN, aN);
+  A = A + A.transpose().eval();
+  return A;
 }
 
 Eigen::MatrixXd CreateRandomDiagonal(const int aN, const int aSeed) {

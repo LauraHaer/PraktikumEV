@@ -37,7 +37,7 @@ TEST(INVERSE_ITERATION, CalculateFromDenseDiagonal) {
   Eigen::MatrixXd A = Eigen::MatrixXd::Identity(n,n);
   A.diagonal().setRandom();
   Eigen::EigenSolver<Eigen::MatrixXd> es(A);
-  auto eigenvalues = es.eigenvalues();;
+  auto eigenvalues = es.eigenvalues();
   auto eigenvectors = es.eigenvectors();
 
   Eigen::MatrixXd vecs(A.cols(),A.cols());

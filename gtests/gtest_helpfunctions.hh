@@ -18,10 +18,13 @@ Eigen::MatrixXd CreateRandomDense(const int aN,
 Eigen::MatrixXd CreateStdRandom(const int aN,
                                   const int aSeed = std::time(nullptr));
 
+Eigen::VectorXd CreateStdRandomVector(const int aN,
+                                  const int aSeed = std::time(nullptr));
+
 Eigen::MatrixXd CreateRandomDiagonal(const int aN,
                                      const int aSeed = std::time(nullptr));
 
-Eigen::VectorXd CreateGoodStartVector(const Eigen::MatrixXd A);
+Eigen::VectorXd CreateGoodStartVector(const Eigen::MatrixXd A, int n = 0);
 
 template <class aMat, class aVec>
 std::vector<double> runLanczos(const aMat& A, const aVec& aV1, const int m,

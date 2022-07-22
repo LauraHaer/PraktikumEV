@@ -62,17 +62,28 @@ template <class aVec>
 aVec tridiag_ev_solver(aVec diag, aVec sdiag) {
   // build T with given diagonal and subdiagonal
   Eigen::MatrixXd TMat = createTMatrix(diag, sdiag);
+  Eigen::EigenSolver<Eigen::MatrixXd> es(TMat);
   // document error as maximum of subdiagonal,
   double e = 1;
 
+  int i = 0;
   // qr iteration until T converged to diagonal matrix
-  while (e > 1e-8) {
-    Eigen::MatrixXd q = givens_q(TMat);
-    TMat = q.transpose() * TMat * q;
-    // update error
-    e = TMat.diagonal<-1>().maxCoeff();
-  }
-  return TMat.diagonal();
+  //while (e > 1e-6) {
+  //  Eigen::MatrixXd q = givens_q(TMat);
+  //  TMat = q.transpose() * TMat * q;
+  //  // update error
+  //  Eigen::MatrixXd test = Eigen::MatrixXd::Zero(TMat.rows(), TMat.rows());
+  //  test.diagonal() = TMat.diagonal();
+  //  test = TMat - test;
+  //    //TMat - Eigen::MatrixXd::Identity(TMat.rows(), TMat.rows()) * TMat.diagonal().eval();
+  //  e = std::max(test.maxCoeff(), - test.minCoeff());
+  //  if (i % 100 == 0) mos << PRINT_REFLECTION(e) << PRINT_REFLECTION(TMat) << std::endl;
+  //  ++i;
+  //}
+  //mos << PRINT_REFLECTION(es.eigenvalues()) << std::endl;
+  //mos << PRINT_REFLECTION(TMat) << std::endl;
+  return es.eigenvalues().real();
+  //return TMat.diagonal();
 }
 
 

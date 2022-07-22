@@ -10,6 +10,7 @@
 #include <iostream>
 #include <type_traits>  // std::is_same_v
 
+#include "progressbar.hpp"
 #include "Lanczos_saad.hh"
 #include "helpfunctions.hh"
 #include "standard_include.hh"
@@ -67,7 +68,9 @@ auto lanczos_factorization(
 #endif
 
   // the algorithm
+  progressbar bar(m-k);
   for (int i = k + 1; i <= m; ++i) {
+    bar.update();
     v.col(i) = r / r.norm();                        // Step (3)
     r = A * v.col(i) - v.col(i - 1) * beta(i - 1);  // Step (4)
     alpha(i) = v.col(i).dot(r);                     // Step (5)
@@ -82,7 +85,7 @@ auto lanczos_factorization(
         aRho * sqrt(std::pow(alpha(i), 2) + std::pow(beta(i - 1), 2))) {
       int ii = 0;
       aVec s;
-      bool r_is_random = false;
+      //bool r_is_random = false;
       do {
         if (ii == 5) {
           //mos << "failed " << PRINT_REFLECTION(i) << std::endl;
@@ -90,20 +93,19 @@ auto lanczos_factorization(
           ++number_of_reorthorthogonalization_fails;
 #endif
           beta(i) = 0;
-          createRandomVector(r);
           // r = aVec::Random(aR.rows());
           // new test
           // if (!r_is_random) ++i;
           //v.col(i) = r / r.norm();
           //r = A * v.col(i);
-          r_is_random = true;
-          ii = 0;
-          // new test
-          aVec r_new = r;
-          for (int iii = 1; iii <= i; ++iii) {
-            //r = r - v.col(iii) * (v.col(iii).dot(r_new) / v.col(iii).norm());
-            r = r - v.col(iii) * (v.col(iii).dot(r) / v.col(iii).norm());
-          }
+          //r_is_random = true;
+          do {
+            createRandomVector(r);
+            aVec old_r = r;
+            for (int iii = 1; iii <= i; ++iii) {
+              r = r - v.col(iii) * (v.col(iii).dot(old_r) / v.col(iii).norm());
+            }
+          } while (r.norm() <= 1);
           break;
         }
         mos << PRINT_REFLECTION(ii) << " on iteration: " << PRINT_REFLECTION(i) << std::endl;

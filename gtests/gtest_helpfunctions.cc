@@ -35,7 +35,7 @@ Eigen::MatrixXd CreateStdRandom(const int aN, const int aSeed) {
   Eigen::MatrixXd A(aN, aN);
   for (int i = 0; i<aN; i++) {
     for (int j=0; j<= i; j++) {
-      int x = std::rand();
+      int x = std::rand() % 100;
       A(i,j) = x;
       A(j,i) = x;
     }
@@ -43,10 +43,21 @@ Eigen::MatrixXd CreateStdRandom(const int aN, const int aSeed) {
   return A;
 }
 
-Eigen::VectorXd CreateGoodStartVector(const Eigen::MatrixXd A) {
+Eigen::VectorXd CreateStdRandomVector(const int aN, const int aSeed) {
+  std::srand(aSeed);
+  Eigen::VectorXd res(aN);
+  for (int i = 0; i<aN; i++) {
+    int x = std::rand() % 100;
+    res(i) = x;
+  }
+  return res;
+}
+
+Eigen::VectorXd CreateGoodStartVector(const Eigen::MatrixXd A, int n) {
+  if (n == 0) n = A.rows();
   Eigen::VectorXd res = Eigen::VectorXd::Zero(A.rows());
   Eigen::EigenSolver<Eigen::MatrixXd> es(A);
-  for(int i =0; i < es.eigenvectors().cols(); ++i) {
+  for(int i =0; i < n; ++i) {
     res = res + es.eigenvectors().col(i).real();
   }
   return res;

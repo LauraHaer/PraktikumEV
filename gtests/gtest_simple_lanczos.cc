@@ -13,7 +13,7 @@
 #include "standard_include.hh"
 
 TEST(SIMPLE_LANCZOS, CalculateSmallEVWithGivenEigenvector) {
-  int n = 5;
+  //int n = 5;
   Eigen::MatrixXd A{{4.0, -1.0, 0.0, 0.0, -1.0},
                     {-1.0, 4.0, -1.0, 0.0, 0.0},
                     {0.0, -1.0, 4.0, -1.0, 0.0},

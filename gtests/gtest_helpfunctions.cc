@@ -62,3 +62,14 @@ Eigen::VectorXd CreateGoodStartVector(const Eigen::MatrixXd A, int n) {
   }
   return res;
 }
+
+Eigen::MatrixXd CreateTridiagMatrix(const int n) {
+  Eigen::MatrixXd A(n,n); 
+  Eigen::VectorXd diag = Eigen::VectorXd::Random(n);
+  Eigen::VectorXd sdiag = Eigen::VectorXd::Random(n-1);
+  A.diagonal(1) = sdiag;
+  A.diagonal(-1) = sdiag;
+  A.diagonal() = diag;
+
+  return A;
+}

@@ -6,6 +6,7 @@
 #include <ctime>
 #include <cstdlib>
 
+#include "gtest_helpfunctions.hh"
 #include "Lanczos.hh"
 #include "helpfunctions.hh"
 #include "standard_include.hh"
@@ -54,12 +55,7 @@ TEST(GIVENS, CalculateQFromSmallDense) {
 TEST(GIVENS, CalculateQFromLargeRandom) {
     std::srand(std::time(nullptr));
     int n = std::rand() % 400 + 100;
-    Eigen::MatrixXd A(n,n); 
-    Eigen::VectorXd diag = Eigen::VectorXd::Random(n);
-    Eigen::VectorXd sdiag = Eigen::VectorXd::Random(n-1);
-    A.diagonal(1) = sdiag;
-    A.diagonal(-1) = sdiag;
-    A.diagonal() = diag;
+    Eigen::MatrixXd A = CreateTridiagMatrix(n);
 
     Eigen::MatrixXd q = givens_q(A);
 

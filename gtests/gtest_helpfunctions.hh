@@ -24,6 +24,8 @@ Eigen::VectorXd CreateStdRandomVector(const int aN,
 Eigen::MatrixXd CreateRandomDiagonal(const int aN,
                                      const int aSeed = std::time(nullptr));
 
+Eigen::MatrixXd CreateTridiagMatrix(const int n);
+
 Eigen::VectorXd CreateGoodStartVector(const Eigen::MatrixXd A, int n = 0);
 
 template <class aMat, class aVec>

@@ -21,6 +21,8 @@ Eigen::MatrixXd CreateStdRandom(const int aN,
 Eigen::MatrixXd CreateRandomDiagonal(const int aN,
                                      const int aSeed = std::time(nullptr));
 
+Eigen::VectorXd CreateGoodStartVector(const Eigen::MatrixXd A);
+
 template <class aMat, class aVec>
 std::vector<double> runLanczos(const aMat& A, const aVec& aV1, const int m,
                                const int k = 0, const double aRho = 1,
@@ -31,7 +33,7 @@ std::vector<double> runLanczos(const aMat& A, const aVec& aV1, const int m,
   result_lanczos<Eigen::MatrixXd> res;
   auto start_time = std::chrono::high_resolution_clock::now();
   if (aSimple) {
-    res = simple_lanczos(A, k, aV1, aRho);
+    res = simple_lanczos(A, m, aV1, aRho);
   } else {
     res = lanczos_ir(A, m, aV1, k, aRho, aEps);
   }
@@ -40,18 +42,25 @@ std::vector<double> runLanczos(const aMat& A, const aVec& aV1, const int m,
   Eigen::EigenSolver<tmpMat> es(DenseA);
   auto comp_eigenvalues = es.eigenvalues();
   std::vector<double> eigenvalue_error;
+  std::vector<double> min_eigenvalue_error;
   std::sort(comp_eigenvalues.begin(), comp_eigenvalues.end(),
             greaterEigenvalue);
   auto eigenvalues = comp_eigenvalues.real();
 
   for (int i = 0; i < res.ev.rows(); ++i) {
     eigenvalue_error.push_back(std::abs(eigenvalues(i) - res.ev(i)));
+    double min = std::abs(eigenvalues(0) - res.ev(i));
+    for (auto x : eigenvalues) {
+      if (std::abs(x - res.ev(i)) < min) {
+        min = std::abs(x - res.ev(i));
+      }
+    }
+    min_eigenvalue_error.push_back(min);
   }
   if (aPrint_result) {
     std::cout
         << "Test successfully executed!"
         << std::endl
-        //<< "Runtime: " << runtime.count() << std::endl
         << "Runtime: "
         << std::chrono::duration_cast<std::chrono::seconds>(runtime).count()
         << " sec" << std::endl
@@ -63,7 +72,14 @@ std::vector<double> runLanczos(const aMat& A, const aVec& aV1, const int m,
     for (auto x : eigenvalue_error) {
       std::cout << x << ", ";
     }
+    std::cout << std::endl << "Min Eigenvalue Error: ";
+    for (auto x : min_eigenvalue_error) {
+      std::cout << x << ", ";
+    }
     std::cout << std::endl;
+  }
+  if (aSimple) {
+    return min_eigenvalue_error;
   }
 
   return eigenvalue_error;
@@ -87,5 +103,6 @@ Mat CreateLaplaceMatrix(int n) {
 
   return Matrix;
 }
+
 
 #endif

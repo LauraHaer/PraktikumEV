@@ -73,30 +73,49 @@ auto lanczos_factorization(
     alpha(i) = v.col(i).dot(r);                     // Step (5)
     r = r - v.col(i) * alpha(i);                    // Step (6)
     beta(i) = r.norm();
+    // Testing
+//    for(int ii = 1; ii < i; ++ii) {
+//      mos << PRINT_REFLECTION(v.col(i).dot(v.col(ii))) << std::endl;
+//    }
+    if (i == m) break;
     if (r.norm() <
         aRho * sqrt(std::pow(alpha(i), 2) + std::pow(beta(i - 1), 2))) {
       int ii = 0;
       aVec s;
+      bool r_is_random = false;
       do {
         if (ii == 5) {
+          //mos << "failed " << PRINT_REFLECTION(i) << std::endl;
 #ifdef trace_reorthogonalization
           ++number_of_reorthorthogonalization_fails;
 #endif
           beta(i) = 0;
-          r = aVec::Random(aR.rows());
-          ++i;
-          if (i >= m) break;
+          createRandomVector(r);
+          // r = aVec::Random(aR.rows());
+          // new test
+          // if (!r_is_random) ++i;
+          //v.col(i) = r / r.norm();
+          //r = A * v.col(i);
+          r_is_random = true;
           ii = 0;
+          // new test
+          aVec r_new = r;
+          for (int iii = 1; iii <= i; ++iii) {
+            //r = r - v.col(iii) * (v.col(iii).dot(r_new) / v.col(iii).norm());
+            r = r - v.col(iii) * (v.col(iii).dot(r) / v.col(iii).norm());
+          }
+          break;
         }
+        mos << PRINT_REFLECTION(ii) << " on iteration: " << PRINT_REFLECTION(i) << std::endl;
         s = v.transpose() * r;  // Step (8)
         r = r - v * s;          // Step (9)
         alpha(i) = alpha(i) + s(i);
         beta(i) = beta(i) + s(i - 1);
         ++ii;
       } while (r.norm() <= aRho * s.norm());
-      //               aRho * sqrt(std::pow(alpha(i), 2) + std::pow(beta(i - 1),
-      //               2) +
-      //                           std::pow(s.norm(), 2)));
+      //} while (r.norm() <
+      //         aRho * sqrt(std::pow(alpha(i), 2) + std::pow(beta(i - 1), 2) +
+      //                     std::pow(s.norm(), 2)));
     }
   }
 #ifdef trace_reorthogonalization
@@ -104,6 +123,7 @@ auto lanczos_factorization(
             << number_of_reorthorthogonalization_fails << " times."
             << std::endl;
 #endif
+  //mos << PRINT_REFLECTION(v) << std::endl;
   return std::make_tuple(alpha, beta, v, r);
 }
 

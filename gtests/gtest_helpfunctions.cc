@@ -42,3 +42,12 @@ Eigen::MatrixXd CreateStdRandom(const int aN, const int aSeed) {
   }
   return A;
 }
+
+Eigen::VectorXd CreateGoodStartVector(const Eigen::MatrixXd A) {
+  Eigen::VectorXd res = Eigen::VectorXd::Zero(A.rows());
+  Eigen::EigenSolver<Eigen::MatrixXd> es(A);
+  for(int i =0; i < es.eigenvectors().cols(); ++i) {
+    res = res + es.eigenvectors().col(i).real();
+  }
+  return res;
+}

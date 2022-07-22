@@ -20,12 +20,10 @@ TEST(SIMPLE_LANCZOS, CalculateSmallEVWithGivenEigenvector) {
                     {0.0, 0.0, -1.0, 4.0, 0.0},
                     {-1.0, 0.0, 0.0, 0.0, 4.0}};
   Eigen::VectorXd v1{{-1.0, 0.0, 1.0, -1.0, 1.0}};
-  //result_lanczos<Eigen::MatrixXd> res = lanczos_ir(A, n, v1, 1);
-  std::cout << v1 << std::endl;
-  result_lanczos<Eigen::MatrixXd> res = simple_lanczos(A, n, v1, 0.9);
+  //result_lanczos<Eigen::MatrixXd> res = simple_lanczos(A, n, v1, 0.9);
 
-  std::cout << res.ev << std::endl;
-  EXPECT_DOUBLE_EQ(res.ev[0], 5.0);
+  std::vector<double> error = runLanczos(A,v1, 5, 0, 1, 0, true, true);
+  EXPECT_DOUBLE_EQ(error.at(0), 0);
 }
 
 TEST(SIMPLE_LANCZOS, CalculateFromDenseDiagonal) {
@@ -33,40 +31,12 @@ TEST(SIMPLE_LANCZOS, CalculateFromDenseDiagonal) {
   int m = std::rand() % 5 + 5;
   int n = m * 2;
   Eigen::MatrixXd A = CreateRandomDiagonal(n);
-  Eigen::EigenSolver<Eigen::MatrixXd> es(A);
-  auto eigenvalues = es.eigenvalues();
-  std::sort(eigenvalues.begin(), eigenvalues.end(), greaterEigenvalue);
-  Eigen::VectorXd v1 = Eigen::VectorXd::Random(n);
-  result_lanczos<Eigen::MatrixXd> res = simple_lanczos(A, n, v1, 1.0);
-  mos << "Eigen calculated eigenvalues" << std::endl;
-  for( int i =0; i < n; ++i) std::cout << eigenvalues[i] << ", ";
-  std::cout << std::endl;
-  mos << "Lanczos calculated eigenvalues" << std::endl;
-  for( int i =0; i < n; ++i) std::cout << res.ev[i] << ", ";
-  std::cout << std::endl;
-  EXPECT_LE(std::abs(res.ev[0] - eigenvalues[0].real()), 1e-8 );
+  Eigen::VectorXd v1 = Eigen::VectorXd::Ones(n);
+  //Eigen::VectorXd v1 = Eigen::VectorXd::Random(n);
+  //
 
-}
-
-TEST(SIMPLE_LANCZOS, DISABLED_CalculateFromDenseDiagonalWithoutReorthogonalization) {
-  std::srand(std::time(nullptr));
-  int m = std::rand() % 5 + 5;
-  int n = m * 2;
-  Eigen::MatrixXd A = CreateRandomDiagonal(n);
-
-  Eigen::EigenSolver<Eigen::MatrixXd> es(A);
-  auto eigenvalues = es.eigenvalues();
-  std::sort(eigenvalues.begin(), eigenvalues.end(), greaterEigenvalue);
-  Eigen::VectorXd v1 = Eigen::VectorXd::Random(n);
-  result_lanczos<Eigen::MatrixXd> res = simple_lanczos(A, n, v1, 1.0);
-
-  mos << "Eigen calculated eigenvalues" << std::endl;
-  for( int i =0; i < n; ++i) std::cout << eigenvalues[i] << ", ";
-  std::cout << std::endl;
-  mos << "Lanczos calculated eigenvalues" << std::endl;
-  for( int i =0; i < n; ++i) std::cout << res.ev[i] << ", ";
-  std::cout << std::endl;
-  EXPECT_LE(std::abs(res.ev[0] - eigenvalues[0].real()), 1e-8 );
+  std::vector<double> error = runLanczos(A,v1, m, 0, 1, 0, true, true);
+  EXPECT_LE(error.at(0), 1e-8 );
 
 }
 
@@ -75,21 +45,21 @@ TEST(SIMPLE_LANCZOS, CalculateFromRandomFullDense) {
   int m = std::rand() % 5 + 5;
   int n = m * 2;
   Eigen::MatrixXd A = CreateStdRandom(n);
-
-  Eigen::EigenSolver<Eigen::MatrixXd> es(A);
-  auto eigenvalues = es.eigenvalues();
-  std::sort(eigenvalues.begin(), eigenvalues.end(), greaterEigenvalue);
   Eigen::VectorXd v1 = Eigen::VectorXd::Random(n);
-  result_lanczos<Eigen::MatrixXd> res = simple_lanczos(A, n, v1, 1.0);
 
-  mos << "Eigen calculated eigenvalues" << std::endl;
-  for( int i =0; i < n; ++i) std::cout << eigenvalues[i] << ", ";
-  std::cout << std::endl;
-  mos << "Lanczos calculated eigenvalues" << std::endl;
-  for( int i =0; i < n; ++i) std::cout << res.ev[i] << ", ";
-  std::cout << std::endl;
-  EXPECT_LE(std::abs(res.ev[0] - eigenvalues[0].real()), 1e-8 );
+  std::vector<double> error = runLanczos(A,v1, m, 0, 1, 0, true, true);
+  EXPECT_LE(error.at(0), 1e-8 );
+}
 
+TEST(SIMPLE_LANCZOS, CalculateFromRandomFullDenseGoodStart) {
+  std::srand(std::time(nullptr));
+  int m = std::rand() % 5 + 5;
+  int n = m * 2;
+  Eigen::MatrixXd A = CreateStdRandom(n);
+  Eigen::VectorXd v1 = CreateGoodStartVector(A);
+
+  std::vector<double> error = runLanczos(A,v1, m, 0, 1, 0, true, true);
+  EXPECT_LE(error.at(0), 1e-8 );
 }
 
 TEST(SIMPLE_LANCZOS, DISABLED_CalculateFromRandomSparse) {
@@ -97,21 +67,9 @@ TEST(SIMPLE_LANCZOS, DISABLED_CalculateFromRandomSparse) {
   int m = std::rand() % 5 + 5;
   int n = m * 2;
   Eigen::SparseMatrix<double> A = CreateRandomSparse(n, n/3*n);
-
-  Eigen::MatrixXd ADense = Eigen::MatrixXd::Identity(n,n) * A;
-  Eigen::EigenSolver<Eigen::MatrixXd> es(ADense);
-  auto eigenvalues = es.eigenvalues();
-  std::sort(eigenvalues.begin(), eigenvalues.end(), greaterEigenvalue);
   Eigen::VectorXd v1 = Eigen::VectorXd::Random(n);
-  result_lanczos<Eigen::MatrixXd> res = simple_lanczos(A, n, v1, 1.0);
 
-  mos << "Eigen calculated eigenvalues" << std::endl;
-  for( int i =0; i < n; ++i) std::cout << eigenvalues[i] << ", ";
-  std::cout << std::endl;
-  mos << "Lanczos calculated eigenvalues" << std::endl;
-  for( int i =0; i < n; ++i) std::cout << res.ev[i] << ", ";
-  std::cout << std::endl;
-  EXPECT_LE(std::abs(res.ev[0] - eigenvalues[0].real()), 1e-8 );
-
+  std::vector<double> error = runLanczos(A,v1, m, 0, 1, 0, true, true);
+  EXPECT_LE(error.at(0), 1e-8 );
 }
 

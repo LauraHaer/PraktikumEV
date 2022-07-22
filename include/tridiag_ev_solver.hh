@@ -64,9 +64,9 @@ aVec tridiag_ev_solver(aVec diag, aVec sdiag) {
   Eigen::MatrixXd TMat = createTMatrix(diag, sdiag);
   Eigen::EigenSolver<Eigen::MatrixXd> es(TMat);
   // document error as maximum of subdiagonal,
-  double e = 1;
+  //double e = 1;
 
-  int i = 0;
+  //int i = 0;
   // qr iteration until T converged to diagonal matrix
   //while (e > 1e-6) {
   //  Eigen::MatrixXd q = givens_q(TMat);

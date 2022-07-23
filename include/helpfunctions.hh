@@ -12,6 +12,15 @@
 /// @returns bool: true if std::abs(a) > std::abs(b)
 bool greaterEigenvalue(std::complex<double> a, std::complex<double> b);
 
+template<class aMat>
+aMat tridiagonalize(aMat A) {
+  aMat tmp = aMat::Zero(A.rows(), A.cols());
+  tmp.diagonal() = A.diagonal();
+  tmp.diagonal(1) = A.diagonal(1);
+  tmp.diagonal(-1) = A.diagonal(-1);
+  return tmp;
+}
+
 template<class aVec>
 void createRandomVector(aVec& aV, int aSeed=std::time(nullptr)) {
   std::srand(aSeed);

@@ -36,13 +36,6 @@ std::vector<double> runLanczos(const aMat& A, const aVec& aV1, const int m,
                                const bool aPrint_result = false) {
   typedef Eigen::Matrix<typename aMat::value_type, -1, -1> tmpMat;
   result_lanczos<Eigen::MatrixXd> res;
-  auto start_time = std::chrono::high_resolution_clock::now();
-  if (aSimple) {
-    res = simple_lanczos(A, m, aV1, aRho);
-  } else {
-    res = lanczos_ir(A, m, aV1, k, aRho, aEps);
-  }
-  auto runtime = std::chrono::high_resolution_clock::now() - start_time;
   tmpMat DenseA = A * tmpMat::Identity(A.cols(), A.cols());
   Eigen::EigenSolver<tmpMat> es(DenseA);
   auto comp_eigenvalues = es.eigenvalues();
@@ -51,6 +44,15 @@ std::vector<double> runLanczos(const aMat& A, const aVec& aV1, const int m,
   std::sort(comp_eigenvalues.begin(), comp_eigenvalues.end(),
             greaterEigenvalue);
   auto eigenvalues = comp_eigenvalues.real();
+  //mos << PRINT_REFLECTION(eigenvalues) << std::endl;
+
+  auto start_time = std::chrono::high_resolution_clock::now();
+  if (aSimple) {
+    res = simple_lanczos(A, m, aV1, aRho);
+  } else {
+    res = lanczos_ir(A, m, aV1, k, aRho, aEps);
+  }
+  auto runtime = std::chrono::high_resolution_clock::now() - start_time;
 
   for (int i = 0; i < res.ev.rows(); ++i) {
     eigenvalue_error.push_back(std::abs(eigenvalues(i) - res.ev(i)));

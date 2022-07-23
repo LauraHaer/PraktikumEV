@@ -17,7 +17,7 @@
 #include "tridiag_ev_solver.hh"
 
 // Trace how often the reorthogonalization fails
-#define trace_reorthogonalization
+//#define trace_reorthogonalization
 
 /// Computes `m` Ritz values for a given **Hermitian** matrix.
 /// @param A: Target Matrix
@@ -68,9 +68,9 @@ auto lanczos_factorization(
 #endif
 
   // the algorithm
-  progressbar bar(m-k);
+  //progressbar bar(m-k);
   for (int i = k + 1; i <= m; ++i) {
-    bar.update();
+    //bar.update();
     v.col(i) = r / r.norm();                        // Step (3)
     r = A * v.col(i) - v.col(i - 1) * beta(i - 1);  // Step (4)
     alpha(i) = v.col(i).dot(r);                     // Step (5)
@@ -108,7 +108,7 @@ auto lanczos_factorization(
           } while (r.norm() <= 1);
           break;
         }
-        mos << PRINT_REFLECTION(ii) << " on iteration: " << PRINT_REFLECTION(i) << std::endl;
+        //mos << PRINT_REFLECTION(ii) << " on iteration: " << PRINT_REFLECTION(i) << std::endl;
         s = v.transpose() * r;  // Step (8)
         r = r - v * s;          // Step (9)
         alpha(i) = alpha(i) + s(i);
@@ -152,25 +152,41 @@ auto lanczos_ir(const aMat& A, const int& m, const aVec& aR, const int& k,
   auto [alpha, beta, vm, rm] =
       lanczos_factorization(A, m, aR, aRho);  // Step (2)
   // vm = vm(Eigen::all, Eigen::lastN(m));
+
   auto TMat = createTMatrix(alpha, beta);
 
   while (TMat(Eigen::seqN(0, k), Eigen::seqN(0, k)).diagonal(1).maxCoeff() >=
          aEps) {  // Step (3)
-    auto eigenvalues =
-        tridiag_ev_solver(alpha, beta);  // Select last p eigenvalues
+    Eigen::EigenSolver<Eigen::MatrixXd> es(TMat);
+    Eigen::VectorXd eigenvalues = es.eigenvalues().real();
+
+  //  auto eigenvalues =
+        //tridiag_ev_solver(alpha, beta);  // Select last p eigenvalues
     std::sort(eigenvalues.begin(), eigenvalues.end(), greaterEigenvalue);
+//    mos << "Start of Loop" << std::endl;
+//    mos << eigenvalues << std::endl;
     tmpMat Q = tmpMat::Identity(m, m);
+    //mos << "Start of Loop" << std::endl;
+    //mos << PRINT_REFLECTION(TMat) << std::endl;
     for (int j = k; j < m; ++j) {
       tmpMat tmp_input = TMat - eigenvalues[j] * tmpMat::Identity(m, m);
       tmpMat Qj = givens_q(tmp_input);
       TMat = Qj.transpose() * TMat * Qj;
       Q = Q * Qj;
     }
+    //mos << PRINT_REFLECTION(TMat) << std::endl;
+    TMat = tridiagonalize(TMat);
     aVec rk = vm.col(k + 1) * TMat(k, k - 1) +
-              rm * eigenvalues[k - 1] * Q(m - 1, k - 1);  // Step (10)
+              rm * Q(m - 1, k - 1);  // Step (10)
     tmpMat vk =
         vm(Eigen::all, Eigen::lastN(m)) * Q(Eigen::all, Eigen::seqN(0, k));
     tmpMat tk = TMat(Eigen::seqN(0, k), Eigen::seqN(0, k));
+    Eigen::EigenSolver<Eigen::MatrixXd> es_tk(tk);
+    Eigen::VectorXd eigenvalues_tk = es_tk.eigenvalues().real();
+//    mos << PRINT_REFLECTION(eigenvalues_tk) << std::endl;
+//    mos << PRINT_REFLECTION(TMat(k+1, k)) << std::endl;
+//    mos << PRINT_REFLECTION(TMat(k, k+1)) << std::endl;
+//    mos << PRINT_REFLECTION(TMat) << std::endl;
     vm = tmpMat::Zero(aR.rows(), m + 1);
     vm(Eigen::all, Eigen::seqN(1, k)) = vk;
     std::tie(alpha, beta, vm, rm) =
@@ -178,7 +194,7 @@ auto lanczos_ir(const aMat& A, const int& m, const aVec& aR, const int& k,
     TMat = createTMatrix(alpha, beta);
     TMat(Eigen::seqN(0, k), Eigen::seqN(0, k)) = tk;
 
-    // std::getchar();
+    //std::getchar();
   }
 
   result_lanczos<Eigen::Matrix<typename aVec::value_type, -1, -1>> res;

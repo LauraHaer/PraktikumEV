@@ -68,37 +68,23 @@ auto lanczos_factorization(
 #endif
 
   // the algorithm
-  //progressbar bar(m-k);
   for (int i = k + 1; i <= m; ++i) {
-    //bar.update();
     v.col(i) = r / r.norm();                        // Step (3)
     r = A * v.col(i) - v.col(i - 1) * beta(i - 1);  // Step (4)
     alpha(i) = v.col(i).dot(r);                     // Step (5)
     r = r - v.col(i) * alpha(i);                    // Step (6)
     beta(i) = r.norm();
-    // Testing
-//    for(int ii = 1; ii < i; ++ii) {
-//      mos << PRINT_REFLECTION(v.col(i).dot(v.col(ii))) << std::endl;
-//    }
-    if (i == m) break;
+    if (i == A.rows()) break;            // TODO Check if this is correkt
     if (r.norm() <
         aRho * sqrt(std::pow(alpha(i), 2) + std::pow(beta(i - 1), 2))) {
       int ii = 0;
       aVec s;
-      //bool r_is_random = false;
       do {
         if (ii == 5) {
-          //mos << "failed " << PRINT_REFLECTION(i) << std::endl;
 #ifdef trace_reorthogonalization
           ++number_of_reorthorthogonalization_fails;
 #endif
           beta(i) = 0;
-          // r = aVec::Random(aR.rows());
-          // new test
-          // if (!r_is_random) ++i;
-          //v.col(i) = r / r.norm();
-          //r = A * v.col(i);
-          //r_is_random = true;
           do {
             createRandomVector(r);
             aVec old_r = r;
@@ -108,13 +94,12 @@ auto lanczos_factorization(
           } while (r.norm() <= 1);
           break;
         }
-        //mos << PRINT_REFLECTION(ii) << " on iteration: " << PRINT_REFLECTION(i) << std::endl;
         s = v.transpose() * r;  // Step (8)
         r = r - v * s;          // Step (9)
         alpha(i) = alpha(i) + s(i);
         beta(i) = beta(i) + s(i - 1);
         ++ii;
-      } while (r.norm() <= aRho * s.norm());
+      } while (r.norm() <= aRho * s.norm()); // TODO Check alternatives
       //} while (r.norm() <
       //         aRho * sqrt(std::pow(alpha(i), 2) + std::pow(beta(i - 1), 2) +
       //                     std::pow(s.norm(), 2)));
@@ -126,7 +111,7 @@ auto lanczos_factorization(
             << std::endl;
 #endif
   //mos << PRINT_REFLECTION(v) << std::endl;
-  return std::make_tuple(alpha, beta, v, r);
+  return std::make_tuple((aVec)alpha(Eigen::lastN(m)), (aVec)beta(Eigen::seqN(1, m-1)), v, r);
 }
 
 template <class aMat, class aVec>
@@ -134,6 +119,8 @@ auto simple_lanczos(const aMat& A, const int& m, const aVec& aR,
                     const double& aRho = 1.0) {
   auto [alpha, beta, v, r] = lanczos_factorization(A, m, aR, aRho);  // Step (2)
   result_lanczos<Eigen::Matrix<typename aVec::value_type, -1, -1>> res;
+  //Eigen::VectorXd  input_alpha = alpha(Eigen::lastN(m));
+  //Eigen::VectorXd input_beta = beta(Eigen::seqN(1,m-1));
   res.ev = tridiag_ev_solver(alpha, beta);
   // res.vec = eigenvectorsA(createTMatrix(alpha, beta), res.ev);
   return res;
@@ -153,53 +140,50 @@ auto lanczos_ir(const aMat& A, const int& m, const aVec& aR, const int& k,
       lanczos_factorization(A, m, aR, aRho);  // Step (2)
   // vm = vm(Eigen::all, Eigen::lastN(m));
 
-  auto TMat = createTMatrix(alpha, beta);
 
-  while (TMat(Eigen::seqN(0, k), Eigen::seqN(0, k)).diagonal(1).maxCoeff() >=
-         aEps) {  // Step (3)
-    Eigen::EigenSolver<Eigen::MatrixXd> es(TMat);
-    Eigen::VectorXd eigenvalues = es.eigenvalues().real();
-
-  //  auto eigenvalues =
-        //tridiag_ev_solver(alpha, beta);  // Select last p eigenvalues
-    std::sort(eigenvalues.begin(), eigenvalues.end(), greaterEigenvalue);
-//    mos << "Start of Loop" << std::endl;
-//    mos << eigenvalues << std::endl;
-    tmpMat Q = tmpMat::Identity(m, m);
-    //mos << "Start of Loop" << std::endl;
+  while (beta.maxCoeff() >= aEps) {  // Step (3)
+    //mos << "Start while" << std::endl;
     //mos << PRINT_REFLECTION(TMat) << std::endl;
+    Eigen::MatrixXd TMat = new_createTMatrix(alpha, beta);
+    Eigen::EigenSolver<Eigen::MatrixXd> es(TMat);
+    //mos << PRINT_REFLECTION(TMat) << std::endl;
+
+    Eigen::VectorXd eigenvalues =
+        tridiag_ev_solver(alpha, beta);  // Select last p eigenvalues
+    //mos << PRINT_REFLECTION(eigenvalues) << std::endl;
+    std::sort(eigenvalues.begin(), eigenvalues.end(), greaterEigenvalue);
+
+    tmpMat Q = tmpMat::Identity(m, m);
     for (int j = k; j < m; ++j) {
       tmpMat tmp_input = TMat - eigenvalues[j] * tmpMat::Identity(m, m);
       tmpMat Qj = givens_q(tmp_input);
       TMat = Qj.transpose() * TMat * Qj;
       Q = Q * Qj;
     }
-    //mos << PRINT_REFLECTION(TMat) << std::endl;
-    TMat = tridiagonalize(TMat);
+
+    mos << PRINT_REFLECTION(rm) << std::endl;
     aVec rk = vm.col(k + 1) * TMat(k, k - 1) +
               rm * Q(m - 1, k - 1);  // Step (10)
+
     tmpMat vk =
         vm(Eigen::all, Eigen::lastN(m)) * Q(Eigen::all, Eigen::seqN(0, k));
-    tmpMat tk = TMat(Eigen::seqN(0, k), Eigen::seqN(0, k));
-    Eigen::EigenSolver<Eigen::MatrixXd> es_tk(tk);
-    Eigen::VectorXd eigenvalues_tk = es_tk.eigenvalues().real();
-//    mos << PRINT_REFLECTION(eigenvalues_tk) << std::endl;
-//    mos << PRINT_REFLECTION(TMat(k+1, k)) << std::endl;
-//    mos << PRINT_REFLECTION(TMat(k, k+1)) << std::endl;
-//    mos << PRINT_REFLECTION(TMat) << std::endl;
     vm = tmpMat::Zero(aR.rows(), m + 1);
     vm(Eigen::all, Eigen::seqN(1, k)) = vk;
+
+    Eigen::VectorXd diag_k = TMat.diagonal()(Eigen::seqN(0,k));
+    Eigen::VectorXd sdiag_k = TMat.diagonal(1)(Eigen::seqN(0,k-1));
+
+
+    mos << PRINT_REFLECTION(rk) << std::endl;
+    if (rk.maxCoeff() < 1e-6) break; // NEW LINE
     std::tie(alpha, beta, vm, rm) =
         lanczos_factorization(A, m, rk, aRho, vm, k);  // Step (2)
-    TMat = createTMatrix(alpha, beta);
-    TMat(Eigen::seqN(0, k), Eigen::seqN(0, k)) = tk;
-
-    //std::getchar();
+    alpha(Eigen::seqN(0,k)) = diag_k;
+    beta(Eigen::seqN(0,k-1)) = sdiag_k;
   }
 
   result_lanczos<Eigen::Matrix<typename aVec::value_type, -1, -1>> res;
-  alpha(Eigen::lastN(m)) = TMat.diagonal();
-  beta(Eigen::lastN(m - 1)) = TMat.diagonal(1);
+
   res.ev = tridiag_ev_solver(alpha, beta);
   // res.vec = eigenvectorsA(createTMatrix(alpha, beta), res.ev);
   return res;

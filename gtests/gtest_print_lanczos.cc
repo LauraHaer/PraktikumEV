@@ -17,8 +17,9 @@ TEST(LANCZOS_IR_EV, CalculateFromLaplaceMatrix) {
 
   for(int i= 0; i < (int)MatrixSize.size(); ++i ) {
     Eigen::SparseMatrix<double> A = CreateLaplaceMatrix<Eigen::SparseMatrix<double>>(MatrixSize.at(i));
-    Eigen::VectorXd v1 = Eigen::VectorXd::Zero(MatrixSize.at(i) * MatrixSize.at(i));
-    v1(0) = 1;
+//    Eigen::VectorXd v1 = Eigen::VectorXd::Zero(MatrixSize.at(i) * MatrixSize.at(i));
+//    v1(0) = 1;
+    Eigen::VectorXd v1 = CreateStdRandomVector(MatrixSize.at(i));
     std::vector<double> error = runLanczos(A, v1, NumberOfTmpEigenvalues.at(i), NumberOfEigenvalues.at(i), 1, 1e-8, false, print_result);
     EXPECT_LE(error.at(0), 1e-10);
     //EXPECT_LE(*std::max_element(error.begin(), error.end()), 1e-5);
@@ -34,28 +35,34 @@ TEST(LANCZOS_IR_EV, CalculateFromRandomSparse) {
   bool print_result = true;
 
   for(int i= 0; i < (int)MatrixSize.size(); ++i ) {
-    Eigen::SparseMatrix<double> A = CreateRandomSparse(MatrixSize.at(i), NumberOfEntries.at(i), 42*i);
-    Eigen::VectorXd v1 = Eigen::VectorXd::Zero(MatrixSize.at(i));
-    v1(0) = 1;
-    std::vector<double> error = runLanczos(A, v1, NumberOfTmpEigenvalues.at(i), NumberOfEigenvalues.at(i), 1, 1e-8, false, print_result);
-    EXPECT_LE(error.at(0), 1e-10);
+    for (int ii=0; ii < 10; ++ii) {
+      Eigen::SparseMatrix<double> A = CreateRandomSparse(MatrixSize.at(i), NumberOfEntries.at(i), 42*i);
+  //    Eigen::VectorXd v1 = Eigen::VectorXd::Zero(MatrixSize.at(i));
+  //    v1(0) = 1;
+      Eigen::VectorXd v1 = CreateStdRandomVector(MatrixSize.at(i));
+      std::vector<double> error = runLanczos(A, v1, NumberOfTmpEigenvalues.at(i), NumberOfEigenvalues.at(i), 1, 1e-8, false, print_result);
+      EXPECT_LE(error.at(0), 1e-10);
+    }
     //EXPECT_LE(*std::max_element(error.begin(), error.end()), 1e-5);
   }
 }
 
 
 TEST(LANCZOS_IR_EV, CalculateFromRandomDense) {
-  std::vector<int> MatrixSize{15,40,60};
+  std::vector<int> MatrixSize{15,40,150};
   std::vector<int> NumberOfEigenvalues{2,6,10};
   std::vector<int> NumberOfTmpEigenvalues{10,20,50};
   bool print_result = true;
 
   for(int i= 0; i < (int)MatrixSize.size(); ++i ) {
     auto A = CreateRandomDense(MatrixSize.at(i), 42*i);
-    Eigen::VectorXd v1 = Eigen::VectorXd::Zero(MatrixSize.at(i));
-    v1(0) = 1;
-    std::vector<double> error = runLanczos(A, v1, NumberOfTmpEigenvalues.at(i), NumberOfEigenvalues.at(i), 1, 1e-8, false, print_result);
-    EXPECT_LE(error.at(0), 1e-10);
+    for (int ii=0; ii < 10; ++ii) {
+  //    Eigen::VectorXd v1 = Eigen::VectorXd::Zero(MatrixSize.at(i));
+  //    v1(0) = 1;
+      Eigen::VectorXd v1 = CreateStdRandomVector(MatrixSize.at(i));
+      std::vector<double> error = runLanczos(A, v1, NumberOfTmpEigenvalues.at(i), NumberOfEigenvalues.at(i), 1, 1e-8, false, print_result);
+      EXPECT_LE(error.at(0), 1e-10);
+    }
     //EXPECT_LE(*std::max_element(error.begin(), error.end()), 1e-5);
   }
 }
@@ -67,10 +74,22 @@ TEST(LANCZOS_IR_EV, CalculateFromRandomDiagonal) {
   std::vector<int> NumberOfTmpEigenvalues{10,20,50};
   bool print_result = true;
 
+
   for(int i= 0; i < (int)MatrixSize.size(); ++i ) {
     auto A = CreateRandomDiagonal(MatrixSize.at(i), 42*i);
-    Eigen::VectorXd v1 = Eigen::VectorXd::Zero(MatrixSize.at(i));
-    v1(0) = 1;
+
+    Eigen::EigenSolver<Eigen::MatrixXd> es(A);
+    auto comp_eigenvalues = es.eigenvalues();
+    std::vector<double> eigenvalue_error;
+    std::vector<double> min_eigenvalue_error;
+    std::sort(comp_eigenvalues.begin(), comp_eigenvalues.end(),
+              greaterEigenvalue);
+    auto eigenvalues = comp_eigenvalues.real();
+    mos << PRINT_REFLECTION(eigenvalues) << std::endl;
+
+    //Eigen::VectorXd v1 = Eigen::VectorXd::Zero(MatrixSize.at(i));
+    //v1(0) = 1;
+    Eigen::VectorXd v1 = CreateStdRandomVector(MatrixSize.at(i));
     std::vector<double> error = runLanczos(A, v1, NumberOfTmpEigenvalues.at(i), NumberOfEigenvalues.at(i), 1, 1e-8, false, print_result);
     //EXPECT_LE(error.at(0), 1e-10);
     //EXPECT_LE(*std::max_element(error.begin(), error.end()), 1e-5);

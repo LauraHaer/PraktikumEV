@@ -139,6 +139,8 @@ auto lanczos_ir(const aMat& A, const int& m, const aVec& aR, const int& k,
   auto [alpha, beta, vm, rm] =
       lanczos_factorization(A, m, aR, aRho);  // Step (2)
   // vm = vm(Eigen::all, Eigen::lastN(m));
+    Eigen::VectorXd diag_k;
+    Eigen::VectorXd sdiag_k;
 
 
   while (beta.maxCoeff() >= aEps) {  // Step (3)
@@ -153,6 +155,10 @@ auto lanczos_ir(const aMat& A, const int& m, const aVec& aR, const int& k,
     //mos << PRINT_REFLECTION(eigenvalues) << std::endl;
     std::sort(eigenvalues.begin(), eigenvalues.end(), greaterEigenvalue);
 
+    Eigen::MatrixXd test_output = vm(Eigen::all, Eigen::lastN(m)) * TMat - A * vm(Eigen::all, Eigen::lastN(m));
+    test_output.col(m-1) = test_output.col(m-1) - rm;
+    //mos << PRINT_REFLECTION(test_output.norm()) << std::endl;
+
     tmpMat Q = tmpMat::Identity(m, m);
     for (int j = k; j < m; ++j) {
       tmpMat tmp_input = TMat - eigenvalues[j] * tmpMat::Identity(m, m);
@@ -161,7 +167,6 @@ auto lanczos_ir(const aMat& A, const int& m, const aVec& aR, const int& k,
       Q = Q * Qj;
     }
 
-    mos << PRINT_REFLECTION(rm) << std::endl;
     aVec rk = vm.col(k + 1) * TMat(k, k - 1) +
               rm * Q(m - 1, k - 1);  // Step (10)
 
@@ -170,12 +175,15 @@ auto lanczos_ir(const aMat& A, const int& m, const aVec& aR, const int& k,
     vm = tmpMat::Zero(aR.rows(), m + 1);
     vm(Eigen::all, Eigen::seqN(1, k)) = vk;
 
-    Eigen::VectorXd diag_k = TMat.diagonal()(Eigen::seqN(0,k));
-    Eigen::VectorXd sdiag_k = TMat.diagonal(1)(Eigen::seqN(0,k-1));
+    test_output = vk * TMat(Eigen::seqN(0,k), Eigen::seqN(0,k)) - A * vk;
+    test_output.col(k-1) = test_output.col(k-1) - rk;
+    //mos << "For k: " << std::endl << PRINT_REFLECTION(test_output.norm()) << std::endl;
+
+    diag_k = TMat.diagonal()(Eigen::seqN(0,k));
+    sdiag_k = TMat.diagonal(1)(Eigen::seqN(0,k-1));
 
 
-    mos << PRINT_REFLECTION(rk) << std::endl;
-    if (rk.maxCoeff() < 1e-6) break; // NEW LINE
+    if (rk.maxCoeff() < 1e-6) break;
     std::tie(alpha, beta, vm, rm) =
         lanczos_factorization(A, m, rk, aRho, vm, k);  // Step (2)
     alpha(Eigen::seqN(0,k)) = diag_k;
@@ -184,7 +192,8 @@ auto lanczos_ir(const aMat& A, const int& m, const aVec& aR, const int& k,
 
   result_lanczos<Eigen::Matrix<typename aVec::value_type, -1, -1>> res;
 
-  res.ev = tridiag_ev_solver(alpha, beta);
+  res.ev = tridiag_ev_solver(diag_k, sdiag_k);
+  //res.ev = tridiag_ev_solver(alpha, beta);
   // res.vec = eigenvectorsA(createTMatrix(alpha, beta), res.ev);
   return res;
 }

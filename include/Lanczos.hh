@@ -166,18 +166,31 @@ result_lanczos lanczos_ir(const aMat& A, const int& m, const aVec& aR,
       Q = Q * Qj;
     }
 
+    tmpMat vk =
+        step.V(Eigen::all, Eigen::lastN(m)) * Q(Eigen::all, Eigen::seqN(0, k));
+    tmpMat V = step.V(Eigen::all, Eigen::lastN(m)) * Q;
+    step.V(Eigen::all, Eigen::lastN(m)) = V;
     aVec rk = step.V.col(k + 1) * TMat(k, k - 1) +
               step.r * Q(m - 1, k - 1);  // Step (10)
 
-    tmpMat vk =
-        step.V(Eigen::all, Eigen::lastN(m)) * Q(Eigen::all, Eigen::seqN(0, k));
+//    mos << PRINT_REFLECTION((step.V(Eigen::all, Eigen::seqN(1,k)) -vk).norm()) << std::endl;
+//
+//    tmpMat test_output = vk * TMat(Eigen::seqN(0,k), Eigen::seqN(0,k)) - A * vk;
+//    test_output.col(k-1) = test_output.col(k-1) - rk;
+//    mos << PRINT_REFLECTION(test_output.col(k-1)) << std::endl;
+
+//    aVec rk = step.V.col(k + 1) * TMat(k, k - 1) +
+//              step.r * Q(m - 1, k - 1);  // Step (10)
+//
+//    tmpMat vk =
+//        step.V(Eigen::all, Eigen::lastN(m)) * Q(Eigen::all, Eigen::seqN(0, k));
     step.V = tmpMat::Zero(aR.rows(), m + 1);
     step.V(Eigen::all, Eigen::seqN(1, k)) = vk;
 
     diag_k = TMat.diagonal()(Eigen::seqN(0, k));
     sdiag_k = TMat.diagonal(1)(Eigen::seqN(0, k - 1));
 
-    if (rk.maxCoeff() < 1e-6) break;
+    if (rk.maxCoeff() < 1e-8) break;
     step = lanczos_factorization(A, m, rk, aRho, step.V, k);  // Step (2)
     step.alpha(Eigen::seqN(0, k)) = diag_k;
     step.beta(Eigen::seqN(0, k - 1)) = sdiag_k;

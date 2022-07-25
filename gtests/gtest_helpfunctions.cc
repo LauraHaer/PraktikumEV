@@ -1,5 +1,6 @@
 #include "gtest_helpfunctions.hh"
 #include <iostream>
+#include <numeric>
 
 Eigen::SparseMatrix<double> CreateRandomSparse(const int aN, const int aEntries,
                                                const int aSeed) {
@@ -63,8 +64,13 @@ Eigen::VectorXd CreateGoodStartVector(const Eigen::MatrixXd A, int n) {
   return res;
 }
 
+bool greaterError (std::vector<double> first, std::vector<double> last) {
+  return std::reduce(first.begin(), first.end()) > std::reduce(last.begin(), last.end());
+
+}
+
 Eigen::MatrixXd CreateTridiagMatrix(const int n) {
-  Eigen::MatrixXd A(n,n); 
+  Eigen::MatrixXd A(n,n);
   Eigen::VectorXd diag = Eigen::VectorXd::Random(n);
   Eigen::VectorXd sdiag = Eigen::VectorXd::Random(n-1);
   A.diagonal(1) = sdiag;

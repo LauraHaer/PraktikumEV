@@ -39,9 +39,9 @@ TEST(LANCZOS_IR_EV, CalculateFromRandomSparse) {
 
 
 TEST(LANCZOS_IR_EV, CalculateFromRandomense) {
-  std::vector<int> MatrixSize{15,40,200};
-  std::vector<int> NumberOfEigenvalues{2,6,6};
-  std::vector<int> NumberOfTmpEigenvalues{10,20,20};
+  std::vector<int> MatrixSize{15,40,200,1000};
+  std::vector<int> NumberOfEigenvalues{2,6,6, 6};
+  std::vector<int> NumberOfTmpEigenvalues{10,20,20, 20};
   bool print_result = true;
 
   for(int i= 0; i < (int)MatrixSize.size(); ++i ) {

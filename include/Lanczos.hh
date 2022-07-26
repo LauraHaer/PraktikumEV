@@ -151,7 +151,7 @@ result_lanczos lanczos_ir(const aMat& A, const int& m, const aVec& aR,
 
   while (step.beta.maxCoeff() >= aEps) {  // Step (3)
     Eigen::MatrixXd TMat = new_createTMatrix(step.alpha, step.beta);
-    Eigen::EigenSolver<Eigen::MatrixXd> es(TMat);
+    //Eigen::EigenSolver<Eigen::MatrixXd> es(TMat);
 
     // Select last p eigenvalues
     Eigen::VectorXd eigenvalues = tridiag_ev_solver(step.alpha, step.beta);

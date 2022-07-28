@@ -7,6 +7,7 @@
 #include <cmath>
 
 #include "standard_include.hh"
+#include "helpfunctions.hh"
 
 // typedef Eigen::VectorXd aVec;  // change into template
 // typedef Eigen::MatrixXd aMat;
@@ -23,6 +24,19 @@ Eigen::MatrixXd createTMatrix(aVec diag, aVec sdiag) {
   TMat.diagonal(1) = sdiag(Eigen::seqN(1, n - 1));
   TMat.diagonal(-1) = sdiag(Eigen::seqN(1, n - 1));
   TMat.diagonal() = diag(Eigen::lastN(n));
+
+  return TMat;
+}
+
+template <class aVec>
+Eigen::MatrixXd new_createTMatrix(aVec diag, aVec sdiag) {
+  int n = diag.rows();
+
+  // build T with given diagonal and subdiagonal
+  Eigen::MatrixXd TMat = Eigen::MatrixXd::Zero(n, n);
+  TMat.diagonal(1) = sdiag;
+  TMat.diagonal(-1) = sdiag;
+  TMat.diagonal() = diag;
 
   return TMat;
 }
@@ -89,9 +103,10 @@ template <class aVec>
 aVec tridiag_ev_solver(aVec diag, aVec sdiag) {
 <<<<<<< Updated upstream
   // build T with given diagonal and subdiagonal
-  Eigen::MatrixXd TMat = createTMatrix(diag, sdiag);
-  //Eigen::EigenSolver<Eigen::MatrixXd> es(TMat);
+  Eigen::MatrixXd TMat = new_createTMatrix(diag, sdiag);
+  Eigen::EigenSolver<Eigen::MatrixXd> es(TMat);
   // document error as maximum of subdiagonal,
+<<<<<<< HEAD
   double e = 1;
 
   int i = 0;
@@ -184,6 +199,33 @@ aVec tridiag_ev_solver(aVec diag, aVec sdiag) {
     }
 >>>>>>> Stashed changes
   return TMat.diagonal();
+=======
+//  double e = 1;
+//
+//  int i = 0;
+//  // qr iteration until T converged to diagonal matrix
+//  while (e > 1e-6) {
+//    Eigen::MatrixXd q = givens_q(TMat);
+//    TMat = q.transpose() * TMat * q;
+//    TMat = tridiagonalize(TMat);
+//  //  // update error
+//    Eigen::MatrixXd test = Eigen::MatrixXd::Zero(TMat.rows(), TMat.rows());
+//   test.diagonal() = TMat.diagonal();
+//    test = TMat - test;
+//      //TMat - Eigen::MatrixXd::Identity(TMat.rows(), TMat.rows()) * TMat.diagonal().eval();
+//    e = std::max(test.maxCoeff(), - test.minCoeff());
+//    //if (i % 100 == 0) mos << PRINT_REFLECTION(e) << PRINT_REFLECTION(TMat) << std::endl;
+//    ++i;
+//  }
+//  //mos << PRINT_REFLECTION(es.eigenvalues()) << std::endl;
+//  mos << PRINT_REFLECTION(i) << std::endl;
+//  mos << PRINT_REFLECTION(e) << std::endl;
+//  mos << PRINT_REFLECTION(TMat.diagonal()) << std::endl;
+  //mos << PRINT_REFLECTION(TMat) << std::endl;
+  aVec res = es.eigenvalues().real();
+  return res;
+  //return TMat.diagonal();
+>>>>>>> 2866b7b502d2583d0f300a04fc513fec85e2c2a4
 }
 
 

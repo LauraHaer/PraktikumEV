@@ -109,5 +109,66 @@ Mat CreateLaplaceMatrix(int n) {
   return Matrix;
 }
 
+<<<<<<< Updated upstream
+=======
+template <class aVec>
+std::vector<double> runTridEVSolver(const aVec& diag, const aVec& sdiag, 
+                                    const bool aPrint_result = false) {
+  typedef Eigen::MatrixXd tmpMat;
+  auto start_time = std::chrono::high_resolution_clock::now();
+  
+  aVec qr_ev = tridiag_ev_solver(diag,sdiag);
+  auto runtime = std::chrono::high_resolution_clock::now() - start_time;
+
+  auto start_time2 = std::chrono::high_resolution_clock::now();
+  Eigen::EigenSolver<tmpMat> es(new_createTMatrix(diag,sdiag));
+  auto comp_eigenvalues = es.eigenvalues();
+  auto runtime2 = std::chrono::high_resolution_clock::now() - start_time2;
+  std::vector<double> eigenvalue_error;
+  std::vector<double> min_eigenvalue_error;
+  std::sort(comp_eigenvalues.begin(), comp_eigenvalues.end(),
+            greaterEigenvalue);
+  auto eigenvalues = comp_eigenvalues.real();
+
+  for (int i = 0; i < qr_ev.rows(); ++i) {
+    eigenvalue_error.push_back(std::abs(eigenvalues(i) - qr_ev(i)));
+    double min = std::abs(eigenvalues(0) - qr_ev(i));
+    for (auto x : eigenvalues) {
+      if (std::abs(x - qr_ev(i)) < min) {
+        min = std::abs(x - qr_ev(i));
+      }
+    }
+    min_eigenvalue_error.push_back(min);
+  }
+  if (aPrint_result) {
+    std::cout
+        << "Test successfully executed!"
+        << std::endl
+        << "Runtime QR Tridiag EV Solver: "
+        << std::chrono::duration_cast<std::chrono::seconds>(runtime).count()
+        << " sec" << std::endl
+        << "Runtime Eigen EV Solver: "
+        << std::chrono::duration_cast<std::chrono::seconds>(runtime2).count()
+        << " sec" << std::endl
+        << "Eigenvalues: ";
+    for (int i = 0; i < qr_ev.rows(); ++i) {
+      std::cout << qr_ev(i) << ", ";
+    }
+    std::cout << std::endl << "Eigenvalue Error: ";
+    for (auto x : eigenvalue_error) {
+      std::cout << x << ", ";
+    }
+    std::cout << std::endl << "Min Eigenvalue Error: ";
+    for (auto x : min_eigenvalue_error) {
+      std::cout << x << ", ";
+    }
+    std::cout << std::endl;
+  }
+
+  return eigenvalue_error;
+}
+
+
+>>>>>>> Stashed changes
 
 #endif

@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <chrono>
 #include <ctime>
+#include <iostream>
 #include <vector>
 
 #include "Lanczos.hh"
@@ -16,10 +17,10 @@ Eigen::MatrixXd CreateRandomDense(const int aN,
                                   const int aSeed = std::time(nullptr));
 
 Eigen::MatrixXd CreateStdRandom(const int aN,
-                                  const int aSeed = std::time(nullptr));
+                                const int aSeed = std::time(nullptr));
 
 Eigen::VectorXd CreateStdRandomVector(const int aN,
-                                  const int aSeed = std::time(nullptr));
+                                      const int aSeed = std::time(nullptr));
 
 Eigen::MatrixXd CreateRandomDiagonal(const int aN,
                                      const int aSeed = std::time(nullptr));
@@ -66,8 +67,7 @@ std::vector<double> runLanczos(const aMat& A, const aVec& aV1, const int m,
   }
   if (aPrint_result) {
     std::cout
-        << "Test successfully executed!"
-        << std::endl
+        << "Test successfully executed!" << std::endl
         << "Runtime: "
         << std::chrono::duration_cast<std::chrono::seconds>(runtime).count()
         << " sec" << std::endl
@@ -94,10 +94,10 @@ std::vector<double> runLanczos(const aMat& A, const aVec& aV1, const int m,
 
 template <class aMat>
 std::vector<double> runLanczosN(const aMat& A, const int n, const int m,
-                               const int k = 0, const double aRho = 1,
-                               const double aEps = 1e-8,
-                               const bool aSimple = false,
-                               const bool aPrint_result = false) {
+                                const int k = 0, const double aRho = 1,
+                                const double aEps = 1e-8,
+                                const bool aSimple = false,
+                                const bool aPrint_result = false) {
   typedef Eigen::Matrix<typename aMat::value_type, -1, -1> tmpMat;
 
   // Generate Eigenvalues with Lanczos
@@ -114,12 +114,13 @@ std::vector<double> runLanczosN(const aMat& A, const int n, const int m,
     runtime.at(i) = std::chrono::high_resolution_clock::now() - start_time;
   }
 
-  //Find Eigenvalues using Eigen Package
+  // Find Eigenvalues using Eigen Package
   tmpMat DenseA = A * tmpMat::Identity(A.cols(), A.cols());
   auto start_time = std::chrono::high_resolution_clock::now();
   Eigen::EigenSolver<tmpMat> es(DenseA);
   auto comp_eigenvalues = es.eigenvalues();
-  std::chrono::duration<double> runtime_eigen = std::chrono::high_resolution_clock::now() - start_time;
+  std::chrono::duration<double> runtime_eigen =
+      std::chrono::high_resolution_clock::now() - start_time;
   std::sort(comp_eigenvalues.begin(), comp_eigenvalues.end(),
             greaterEigenvalue);
   auto eigenvalues = comp_eigenvalues.real();
@@ -129,7 +130,8 @@ std::vector<double> runLanczosN(const aMat& A, const int n, const int m,
   std::vector<std::vector<double>> min_eigenvalue_error(n);
   for (int j = 0; j < n; ++j) {
     for (int i = 0; i < res_vec.at(j).ev.rows(); ++i) {
-      eigenvalue_error.at(j).push_back(std::abs(eigenvalues(i) - res_vec.at(j).ev(i)));
+      eigenvalue_error.at(j).push_back(
+          std::abs(eigenvalues(i) - res_vec.at(j).ev(i)));
       double min = std::abs(eigenvalues(0) - res_vec.at(j).ev(i));
       for (auto x : eigenvalues) {
         if (std::abs(x - res_vec.at(j).ev(i)) < min) {
@@ -141,10 +143,11 @@ std::vector<double> runLanczosN(const aMat& A, const int n, const int m,
   }
 
   std::cout << "NEW MATRIX" << std::endl << "Eigen Eigenvalues: ";
-  for(auto x : eigenvalues) {
+  for (auto x : eigenvalues) {
     std::cout << x << ", ";
   }
-  std::vector<double> best_min_error = *std::max_element(min_eigenvalue_error.begin(), min_eigenvalue_error.end(), greaterError);
+  std::vector<double> best_min_error = *std::max_element(
+      min_eigenvalue_error.begin(), min_eigenvalue_error.end(), greaterError);
   std::cout << std::endl;
   std::cout << "Best approximation of any Eigenvalues: ";
   for (auto x : best_min_error) {
@@ -154,16 +157,18 @@ std::vector<double> runLanczosN(const aMat& A, const int n, const int m,
 
   for (int j = 0; j < n; ++j) {
     if (aPrint_result) {
-      std::cout
-          << "Test successfully executed!"
-          << std::endl
-          << "Runtime: "
-          << std::chrono::duration_cast<std::chrono::milliseconds>(runtime.at(j)).count()
-          << " ms" << std::endl
-          << "Runtime Eigen: "
-          << std::chrono::duration_cast<std::chrono::milliseconds>(runtime_eigen).count()
-          << " ms" << std::endl
-          << "Eigenvalues: ";
+      std::cout << "Test successfully executed!" << std::endl
+                << "Runtime: "
+                << std::chrono::duration_cast<std::chrono::milliseconds>(
+                       runtime.at(j))
+                       .count()
+                << " ms" << std::endl
+                << "Runtime Eigen: "
+                << std::chrono::duration_cast<std::chrono::milliseconds>(
+                       runtime_eigen)
+                       .count()
+                << " ms" << std::endl
+                << "Eigenvalues: ";
       for (int i = 0; i < res_vec.at(j).ev.rows(); ++i) {
         std::cout << res_vec.at(j).ev(i) << ", ";
       }
@@ -177,12 +182,8 @@ std::vector<double> runLanczosN(const aMat& A, const int n, const int m,
       }
       std::cout << std::endl;
     }
-  std::cout << std::endl;
+    std::cout << std::endl;
   }
-
-    //if (aSimple) {
-    //  return min_eigenvalue_error;
-    //}
 
   return best_min_error;
 }
@@ -205,67 +206,4 @@ Mat CreateLaplaceMatrix(int n) {
 
   return Matrix;
 }
-
-<<<<<<< Updated upstream
-=======
-template <class aVec>
-std::vector<double> runTridEVSolver(const aVec& diag, const aVec& sdiag, 
-                                    const bool aPrint_result = false) {
-  typedef Eigen::MatrixXd tmpMat;
-  auto start_time = std::chrono::high_resolution_clock::now();
-  
-  aVec qr_ev = tridiag_ev_solver(diag,sdiag);
-  auto runtime = std::chrono::high_resolution_clock::now() - start_time;
-
-  auto start_time2 = std::chrono::high_resolution_clock::now();
-  Eigen::EigenSolver<tmpMat> es(new_createTMatrix(diag,sdiag));
-  auto comp_eigenvalues = es.eigenvalues();
-  auto runtime2 = std::chrono::high_resolution_clock::now() - start_time2;
-  std::vector<double> eigenvalue_error;
-  std::vector<double> min_eigenvalue_error;
-  std::sort(comp_eigenvalues.begin(), comp_eigenvalues.end(),
-            greaterEigenvalue);
-  auto eigenvalues = comp_eigenvalues.real();
-
-  for (int i = 0; i < qr_ev.rows(); ++i) {
-    eigenvalue_error.push_back(std::abs(eigenvalues(i) - qr_ev(i)));
-    double min = std::abs(eigenvalues(0) - qr_ev(i));
-    for (auto x : eigenvalues) {
-      if (std::abs(x - qr_ev(i)) < min) {
-        min = std::abs(x - qr_ev(i));
-      }
-    }
-    min_eigenvalue_error.push_back(min);
-  }
-  if (aPrint_result) {
-    std::cout
-        << "Test successfully executed!"
-        << std::endl
-        << "Runtime QR Tridiag EV Solver: "
-        << std::chrono::duration_cast<std::chrono::seconds>(runtime).count()
-        << " sec" << std::endl
-        << "Runtime Eigen EV Solver: "
-        << std::chrono::duration_cast<std::chrono::seconds>(runtime2).count()
-        << " sec" << std::endl
-        << "Eigenvalues: ";
-    for (int i = 0; i < qr_ev.rows(); ++i) {
-      std::cout << qr_ev(i) << ", ";
-    }
-    std::cout << std::endl << "Eigenvalue Error: ";
-    for (auto x : eigenvalue_error) {
-      std::cout << x << ", ";
-    }
-    std::cout << std::endl << "Min Eigenvalue Error: ";
-    for (auto x : min_eigenvalue_error) {
-      std::cout << x << ", ";
-    }
-    std::cout << std::endl;
-  }
-
-  return eigenvalue_error;
-}
-
-
->>>>>>> Stashed changes
-
 #endif

@@ -1,4 +1,5 @@
 #include "gtest_helpfunctions.hh"
+
 #include <iostream>
 #include <numeric>
 
@@ -34,11 +35,11 @@ Eigen::MatrixXd CreateRandomDiagonal(const int aN, const int aSeed) {
 Eigen::MatrixXd CreateStdRandom(const int aN, const int aSeed) {
   std::srand(aSeed);
   Eigen::MatrixXd A(aN, aN);
-  for (int i = 0; i<aN; i++) {
-    for (int j=0; j<= i; j++) {
+  for (int i = 0; i < aN; i++) {
+    for (int j = 0; j <= i; j++) {
       int x = std::rand() % 100;
-      A(i,j) = x;
-      A(j,i) = x;
+      A(i, j) = x;
+      A(j, i) = x;
     }
   }
   return A;
@@ -47,7 +48,7 @@ Eigen::MatrixXd CreateStdRandom(const int aN, const int aSeed) {
 Eigen::VectorXd CreateStdRandomVector(const int aN, const int aSeed) {
   std::srand(aSeed);
   Eigen::VectorXd res(aN);
-  for (int i = 0; i<aN; i++) {
+  for (int i = 0; i < aN; i++) {
     int x = std::rand() % 100;
     res(i) = x;
   }
@@ -58,21 +59,21 @@ Eigen::VectorXd CreateGoodStartVector(const Eigen::MatrixXd A, int n) {
   if (n == 0) n = A.rows();
   Eigen::VectorXd res = Eigen::VectorXd::Zero(A.rows());
   Eigen::EigenSolver<Eigen::MatrixXd> es(A);
-  for(int i =0; i < n; ++i) {
+  for (int i = 0; i < n; ++i) {
     res = res + es.eigenvectors().col(i).real();
   }
   return res;
 }
 
-bool greaterError (std::vector<double> first, std::vector<double> last) {
-  return std::reduce(first.begin(), first.end()) > std::reduce(last.begin(), last.end());
-
+bool greaterError(std::vector<double> first, std::vector<double> last) {
+  return std::reduce(first.begin(), first.end()) >
+         std::reduce(last.begin(), last.end());
 }
 
 Eigen::MatrixXd CreateTridiagMatrix(const int n) {
-  Eigen::MatrixXd A(n,n);
+  Eigen::MatrixXd A(n, n);
   Eigen::VectorXd diag = Eigen::VectorXd::Random(n);
-  Eigen::VectorXd sdiag = Eigen::VectorXd::Random(n-1);
+  Eigen::VectorXd sdiag = Eigen::VectorXd::Random(n - 1);
   A.diagonal(1) = sdiag;
   A.diagonal(-1) = sdiag;
   A.diagonal() = diag;

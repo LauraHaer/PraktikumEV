@@ -2,21 +2,12 @@
 #define LANCZOS_HH_
 
 #include <Eigen/Dense>
-#include <Eigen/Eigenvalues>
 #include <Eigen/Sparse>
-#include <algorithm>
-#include <cassert>
-#include <cmath>
-#include <iostream>
+#include <algorithm>    // std::sort
+#include <cassert>      // assert
 #include <type_traits>  // std::is_same_v
 
-#include "Lanczos_saad.hh"
 #include "helpfunctions.hh"
-#include "standard_include.hh"
-#include "tridiag_ev_solver.hh"
-
-// Trace how often the reorthogonalization fails
-//#define trace_reorthogonalization
 
 struct result_lanczos {
   Eigen::VectorXd ev;
@@ -31,25 +22,17 @@ struct factorization_result {
   aVec r;
 };
 
-/// Computes the Lanczos factorisation of A, starting at the k+1 step
-/// @param A: Target Matrix
-/// @param m: desired number of Eigenvalues
-/// @param aR: start vector aR
-/// @param aRho: factor for checking if reorthogonalization is necessary
-/// @param aV: start Matrix V
-/// @param k: number of already computed steps
-/// @returns alpha, beta, V, r
 template <class aMat, class aVec>
 factorization_result<aVec> lanczos_factorization(
     const aMat& A, const int& m, const aVec& aR, const double& aRho,
     Eigen::Matrix<typename aVec::value_type, -1, -1> aV =
-        Eigen::Matrix<typename aVec::value_type, -1, -1>::Zero(0, 0),
+        Eigen::Matrix<typename aVec::value_type, -1, -1>(0, 0),
     const int& k = 0) {
+  //
   // Type Definitions and Asserts
   typedef typename aVec::value_type aData;
-  typedef Eigen::Matrix<aData, -1, -1>
-      tmpMat;  // Dense Matrix with dynamic size
-  if (aV.rows() == 0) aV = tmpMat::Zero(aR.rows(), m + 1);
+  typedef Eigen::Matrix<aData, -1, -1> tmpMat;
+
   assert("Matrix must be quadratic" && A.cols() == A.rows());
   assert("aR and A must have the same number of rows" && A.cols() == aR.rows());
   static_assert(
@@ -57,16 +40,18 @@ factorization_result<aVec> lanczos_factorization(
       std::is_same_v<typename aMat::value_type, typename aVec::value_type>);
   assert("Number of calc Eigenvalues must be <= dim(A)" && m <= aR.rows());
   assert("aRho must be positive" && aRho >= 0);
+  assert("aV must have m columns" && (aV.cols() == m || aV.cols() == 0));
+  assert("aV must have same number of rows as A" &&
+         (aV.rows() == A.rows() || aV.rows() == 0));
 
   aVec r = aR;
   aVec beta = aVec::Zero(m + 1);
   aVec alpha = aVec::Zero(m + 1);
   beta(k) = r.norm();
-  tmpMat v = aV;
-
-#ifdef trace_reorthogonalization
-  int number_of_reorthorthogonalization_fails = 0;
-#endif
+  tmpMat v = tmpMat::Zero(aR.rows(), m + 1);
+  if (aV.cols() != 0) {
+    v(Eigen::all, Eigen::lastN(m)) = aV;
+  }
 
   // the algorithm
   for (int i = k + 1; i <= m; ++i) {
@@ -75,22 +60,19 @@ factorization_result<aVec> lanczos_factorization(
     alpha(i) = v.col(i).dot(r);                     // Step (5)
     r = r - v.col(i) * alpha(i);                    // Step (6)
     beta(i) = r.norm();
-    if (i == A.rows()) break;  // TODO Check if this is correkt
+    if (i == A.rows()) break;  // v already spans R^(A.rows())
     if (r.norm() <
         aRho * sqrt(std::pow(alpha(i), 2) + std::pow(beta(i - 1), 2))) {
       int ii = 0;
       aVec s;
       do {
         if (ii == 5) {  // Reorthogonalization failed
-#ifdef trace_reorthogonalization
-          ++number_of_reorthorthogonalization_fails;
-#endif
           beta(i) = 0;
           do {
             createRandomVector(r);
-            aVec old_r = r;
+            // Orthogonalize r using modified gram-schmidt
             for (int iii = 1; iii <= i; ++iii) {
-              r = r - v.col(iii) * (v.col(iii).dot(old_r) / v.col(iii).norm());
+              r = r - v.col(iii) * (v.col(iii).dot(r) / r.dot(r));
             }
           } while (r.norm() <= 1);
           break;
@@ -100,25 +82,12 @@ factorization_result<aVec> lanczos_factorization(
         alpha(i) = alpha(i) + s(i);
         beta(i) = beta(i) + s(i - 1);
         ++ii;
-      } while (r.norm() <= aRho * s.norm());  // TODO Check alternatives
-      //} while (r.norm() <
-      //         aRho * sqrt(std::pow(alpha(i), 2) + std::pow(beta(i - 1), 2)
-      //         +
-      //                     std::pow(s.norm(), 2)));
+      } while (r.norm() <= aRho * s.norm());  // could include alpha and beta
     }
   }
-#ifdef trace_reorthogonalization
-  std::cout << "Reorthogonalisation failed: "
-            << number_of_reorthorthogonalization_fails << " times."
-            << std::endl;
-#endif
-  // mos << PRINT_REFLECTION(v) << std::endl;
-  //
-  factorization_result<aVec> res = {(aVec)alpha(Eigen::lastN(m)),
-                                    (aVec)beta(Eigen::seqN(1, m - 1)), v, r};
-  return res;
-  //  return std::make_tuple((aVec)alpha(Eigen::lastN(m)),
-  //                         (aVec)beta(Eigen::seqN(1, m - 1)), v, r);
+  return factorization_result<aVec>{(aVec)alpha(Eigen::lastN(m)),
+                                    (aVec)beta(Eigen::seqN(1, m - 1)),
+                                    (tmpMat)v(Eigen::all, Eigen::lastN(m)), r};
 }
 
 template <class aMat, class aVec>
@@ -145,19 +114,15 @@ result_lanczos lanczos_ir(const aMat& A, const int& m, const aVec& aR,
 
   factorization_result<aVec> step =
       lanczos_factorization(A, m, aR, aRho);  // Step (2)
-  // vm = vm(Eigen::all, Eigen::lastN(m));
-  Eigen::VectorXd diag_k;
-  Eigen::VectorXd sdiag_k;
+  Eigen::VectorXd alpha_k;
+  Eigen::VectorXd beta_k;
 
-  while (step.beta.maxCoeff() >= aEps) {  // Step (3)
-    Eigen::MatrixXd TMat = new_createTMatrix(step.alpha, step.beta);
-    //Eigen::EigenSolver<Eigen::MatrixXd> es(TMat);
+  while (step.beta(Eigen::seqN(0, k - 1)).maxCoeff() >= aEps) {  // Step (3)
+    Eigen::MatrixXd TMat = createTMatrix(step.alpha, step.beta);
 
-    // Select last p eigenvalues
+    // Reduce to solution of k largest eigenvalues
     Eigen::VectorXd eigenvalues = tridiag_ev_solver(step.alpha, step.beta);
     std::sort(eigenvalues.begin(), eigenvalues.end(), greaterEigenvalue);
-    // mos << PRINT_REFLECTION(eigenvalues) << std::endl;
-
     tmpMat Q = tmpMat::Identity(m, m);
     for (int j = k; j < m; ++j) {
       tmpMat tmp_input = TMat - eigenvalues[j] * tmpMat::Identity(m, m);
@@ -165,26 +130,24 @@ result_lanczos lanczos_ir(const aMat& A, const int& m, const aVec& aR,
       TMat = Qj.transpose() * TMat * Qj;
       Q = Q * Qj;
     }
+    step.V = step.V * Q;
+    aVec rk =
+        step.V.col(k) * TMat(k, k - 1) + step.r * Q(m - 1, k - 1);  // Step (10)
+    step.V(Eigen::all, Eigen::lastN(m - k)).setZero();
 
-    tmpMat V = step.V(Eigen::all, Eigen::lastN(m)) * Q;
-    step.V(Eigen::all, Eigen::lastN(m)) = V;
-    aVec rk = step.V.col(k + 1) * TMat(k, k - 1) +
-              step.r * Q(m - 1, k - 1);  // Step (10)
-    step.V(Eigen::all, Eigen::lastN(m-k)) = tmpMat::Zero(step.V.rows(), m-k);
-
-    diag_k = TMat.diagonal()(Eigen::seqN(0, k));
-    sdiag_k = TMat.diagonal(1)(Eigen::seqN(0, k - 1));
+    alpha_k = TMat.diagonal()(Eigen::seqN(0, k));
+    beta_k = TMat.diagonal(1)(Eigen::seqN(0, k - 1));
 
     if (rk.maxCoeff() < 1e-8) break;
     step = lanczos_factorization(A, m, rk, aRho, step.V, k);  // Step (2)
-    step.alpha(Eigen::seqN(0, k)) = diag_k;
-    step.beta(Eigen::seqN(0, k - 1)) = sdiag_k;
+    step.alpha(Eigen::seqN(0, k)) = alpha_k;
+    step.beta(Eigen::seqN(0, k - 1)) = beta_k;
   }
 
   result_lanczos res;
 
-  res.ev = tridiag_ev_solver(diag_k, sdiag_k);
-  //  res.vec = eigenvectorsA(createTMatrix(alpha, beta), res.ev);
+  res.ev = tridiag_ev_solver(alpha_k, beta_k);
+  // res.vec = eigenvectorsA(createTMatrix(alpha, beta), res.ev);
   return res;
 }
 #endif
